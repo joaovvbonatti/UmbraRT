@@ -1,0 +1,27 @@
+# CLion
+.idea/
+
+# CMake
+cmake-build-*/
+build/
+CMakeFiles/
+CMakeCache.txt
+Makefile
+cmake_install.cmake
+
+# Compilation
+*.o
+*.obj
+*.a
+*.so
+*.dll
+*.exe
+
+# Linux
+*.out
+
+# VSCode
+.vscode/
+
+# Logs
+*.log
