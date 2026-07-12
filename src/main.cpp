@@ -114,6 +114,11 @@ int main() {
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+    Camera camera;
+
+    glfwSetWindowUserPointer(window, &camera);
+    glfwSetCursorPosCallback(window, mouseCallback);
+
     //Dear ImGui
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -162,11 +167,6 @@ int main() {
 
     glm::vec3 spherePosition(0.0);
 
-    Camera camera;
-
-    glfwSetWindowUserPointer(window, &camera);
-    glfwSetCursorPosCallback(window, mouseCallback);
-
     float lastFrame = glfwGetTime();
 
     while (!glfwWindowShouldClose(window)) {
@@ -181,6 +181,7 @@ int main() {
         ImGui::NewFrame();
         ImGui::Begin("Debug");
         ImGui::DragFloat3("Sphere position", glm::value_ptr(spherePosition), 0.01f);
+        ImGui::DragFloat("Camera FOV", &camera.fov, 0.1f);
         ImGui::End();
 
         shader.use();

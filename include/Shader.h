@@ -14,5 +14,5 @@ public:
     void setVec2(const std::string& name, const glm::vec2& value) const;
     void setFloat(const std::string& name, float value) const;
 private:
-    static std::string read_file(const std::string& path);
+    static std::string readFile(const std::string& path);
 };
