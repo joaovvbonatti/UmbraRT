@@ -187,13 +187,13 @@ int main() {
 
         glfwGetFramebufferSize(window, &width, &height);
 
-        glUniform2f(glGetUniformLocation(shader.id, "uResolution"), (float)width, (float)height);
-        glUniform3f(glGetUniformLocation(shader.id, "uSpherePosition"), spherePosition.x, spherePosition.y, spherePosition.z);
-        glUniform3f(glGetUniformLocation(shader.id, "uCameraPosition"), camera.position.x, camera.position.y, camera.position.z);
-        glUniform3f(glGetUniformLocation(shader.id, "uCameraForward"), camera.forward.x, camera.forward.y, camera.forward.z);
-        glUniform3f(glGetUniformLocation(shader.id, "uCameraRight"), camera.right.x, camera.right.y, camera.right.z);
-        glUniform3f(glGetUniformLocation(shader.id, "uCameraUp"), camera.up.x, camera.up.y, camera.up.z);
-        glUniform1f(glGetUniformLocation(shader.id, "uCameraFov"), camera.fov);
+        shader.setVec2("uResolution", glm::vec2(width, height));
+        shader.setVec3("uSpherePosition", spherePosition);
+        shader.setVec3("uCameraPosition", camera.position);
+        shader.setVec3("uCameraForward", camera.forward);
+        shader.setVec3("uCameraRight", camera.right);
+        shader.setVec3("uCameraUp", camera.up);
+        shader.setFloat("uCameraFov", camera.fov);
 
 
         glBindVertexArray(VAO);
