@@ -12,39 +12,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Camera.h"
-
-bool firstMouse = true;
-double lastX = 0;
-double lastY = 0;
-
-bool mouseCaptured = true;
-
-void mouseCallback(GLFWwindow* window, double xpos, double ypos)
-{
-    if (!mouseCaptured)
-        return;
-
-    Camera* camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
-
-    static bool firstMouse = true;
-    static double lastX = 0.0;
-    static double lastY = 0.0;
-
-    if (firstMouse)
-    {
-        lastX = xpos;
-        lastY = ypos;
-        firstMouse = false;
-    }
-
-    float xOffset = static_cast<float>(xpos - lastX);
-    float yOffset = static_cast<float>(lastY - ypos);
-
-    lastX = xpos;
-    lastY = ypos;
-
-    camera->processMouse(xOffset, yOffset);
-}
+#include "Input.h"
 
 int width = 1600;
 int height = 900;
@@ -53,7 +21,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
-void processInput(GLFWwindow *window, Camera& camera, float deltaTime) {
+/*void processInput(GLFWwindow *window, Camera& camera, float deltaTime) {
     static bool tabPressed = false;
 
     bool tab = glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS;
@@ -89,7 +57,7 @@ void processInput(GLFWwindow *window, Camera& camera, float deltaTime) {
 
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.processKeyboard(false, false, false, true, deltaTime);
-}
+}*/
 
 int main() {
     glfwInit();
@@ -116,8 +84,7 @@ int main() {
 
     Camera camera;
 
-    glfwSetWindowUserPointer(window, &camera);
-    glfwSetCursorPosCallback(window, mouseCallback);
+    Input input(window, camera);
 
     //Dear ImGui
     IMGUI_CHECKVERSION();
@@ -174,7 +141,7 @@ int main() {
         float deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        processInput(window, camera, deltaTime);
+        input.update(deltaTime);
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
