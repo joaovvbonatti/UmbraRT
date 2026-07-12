@@ -5,6 +5,8 @@
 Input::Input(GLFWwindow *window, Camera &camera) : window(window), camera(camera) {
     glfwSetWindowUserPointer(window, this);
     glfwSetCursorPosCallback(window, mouseCallback);
+
+    setMouseCaptured(true);
 }
 
 void Input::mouseCallback(GLFWwindow* window, double xPos, double yPos) {
@@ -17,10 +19,6 @@ void Input::mouseCallback(GLFWwindow* window, double xPos, double yPos) {
 void Input::onMouseMove(double xPos, double yPos) {
     if (!mouseCaptured)
         return;
-
-    static bool firstMouse = true;
-    static double lastX = 0.0;
-    static double lastY = 0.0;
 
     if (firstMouse)
     {
@@ -40,12 +38,15 @@ void Input::onMouseMove(double xPos, double yPos) {
 
 void Input::update(float deltaTime) {
     bool tab = glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS;
+
     if (tab && !tabPressed) {
-        mouseCaptured = !mouseCaptured;
-        glfwSetInputMode(window, GLFW_CURSOR, mouseCaptured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+       setMouseCaptured(!mouseCaptured);
     }
 
     tabPressed = tab;
+
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
 
     if (!mouseCaptured)
         return;
@@ -56,4 +57,11 @@ void Input::update(float deltaTime) {
     bool moveRight = glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS;
 
     camera.processKeyboard(moveForward, moveBackward, moveLeft, moveRight, deltaTime);
+}
+
+void Input::setMouseCaptured(bool captured) {
+    mouseCaptured = captured;
+    firstMouse = true;
+
+    glfwSetInputMode(window, GLFW_CURSOR, mouseCaptured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
 }

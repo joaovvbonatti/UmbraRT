@@ -17,4 +17,10 @@ private:
 
     bool mouseCaptured = true;
     bool tabPressed = false;
+
+    bool firstMouse = true;
+    double lastX = 0.0;
+    double lastY = 0.0;
+
+    void setMouseCaptured(bool captured);
 };

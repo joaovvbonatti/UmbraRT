@@ -21,44 +21,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
-/*void processInput(GLFWwindow *window, Camera& camera, float deltaTime) {
-    static bool tabPressed = false;
-
-    bool tab = glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS;
-
-    if (tab && !tabPressed)
-    {
-        mouseCaptured = !mouseCaptured;
-
-        glfwSetInputMode(
-            window,
-            GLFW_CURSOR,
-            mouseCaptured
-                ? GLFW_CURSOR_DISABLED
-                : GLFW_CURSOR_NORMAL);
-    }
-
-    tabPressed = tab;
-
-
-    if (!mouseCaptured)
-        return;
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.processKeyboard(true, false, false, false, deltaTime);
-
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.processKeyboard(false, true, false, false, deltaTime);
-
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera.processKeyboard(false, false, true, false, deltaTime);
-
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.processKeyboard(false, false, false, true, deltaTime);
-}*/
-
 int main() {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -80,8 +42,6 @@ int main() {
         return -1;
     }
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
     Camera camera;
 
     Input input(window, camera);
@@ -91,7 +51,7 @@ int main() {
     ImGui::CreateContext();
 
     ImGuiIO& io = ImGui::GetIO();
-    (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
 
     ImGui::StyleColorsDark();
 
