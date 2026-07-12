@@ -6,7 +6,8 @@ set(CMAKE_CXX_STANDARD 20)
 add_executable(UmbraRT src/main.cpp
         include/Shader.h
         src/Shader.cpp
-        include/Camera.h)
+        include/Camera.h
+        src/Camera.cpp)
 
 target_include_directories(UmbraRT PRIVATE
         include

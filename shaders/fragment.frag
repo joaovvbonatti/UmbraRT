@@ -2,7 +2,22 @@
 out vec4 FragColor;
 
 uniform vec2 uResolution;
+
 uniform vec3 uSpherePosition;
+
+uniform vec3 uCameraPosition;
+uniform vec3 uCameraForward;
+uniform vec3 uCameraRight;
+uniform vec3 uCameraUp;
+uniform float uCameraFov;
+
+struct Camera{
+    vec3 position;
+    vec3 forward;
+    vec3 up;
+    vec3 right;
+    float fov;
+};
 
 struct Ray{
     vec3 origin;
@@ -104,8 +119,11 @@ void main() {
     uv = uv * 2.0 - 1.0;
     uv.x *= uResolution.x / uResolution.y;
 
-    vec3 rayOrigin = vec3(0.0, 0.0, 2.0);
-    vec3 rayDir = normalize(vec3(uv.x, uv.y, -1.0));
+
+    float scale = tan(radians(uCameraFov * 0.5));
+
+    vec3 rayDir =
+    normalize(uCameraForward + uv.x * scale * uCameraRight + uv.y * scale * uCameraUp);
 
     Sphere sphere;
     sphere.center = uSpherePosition;
@@ -119,7 +137,7 @@ void main() {
     HitInfo hit;
 
     Ray ray;
-    ray.origin = rayOrigin;
+    ray.origin = uCameraPosition;
     ray.direction = rayDir;
 
     vec3 color;

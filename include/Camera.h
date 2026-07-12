@@ -4,8 +4,25 @@
 
 class Camera {
 public:
+    Camera();
+
+    void updateVectors();
+
+    void processKeyboard(bool forward, bool backward, bool left, bool right, float deltaTime);
+
+    void processMouse(float xOffset, float yOffset);
+
     glm::vec3 position;
-    glm::vec3 target;
+
+    float fov = 60.f;
+
+    glm::vec3 forward;
+    glm::vec3 right;
     glm::vec3 up;
-private:
+
+    float yaw;
+    float pitch;
+
+    float speed;
+    float sensitivity;
 };
