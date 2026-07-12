@@ -14,4 +14,7 @@ private:
     GLFWwindow* window;
 
     void onMouseMove(double xPos, double yPos);
+
+    bool mouseCaptured = true;
+    bool tabPressed = false;
 };

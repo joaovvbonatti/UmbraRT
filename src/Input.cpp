@@ -15,6 +15,9 @@ void Input::mouseCallback(GLFWwindow* window, double xPos, double yPos) {
 }
 
 void Input::onMouseMove(double xPos, double yPos) {
+    if (!mouseCaptured)
+        return;
+
     static bool firstMouse = true;
     static double lastX = 0.0;
     static double lastY = 0.0;
@@ -36,6 +39,17 @@ void Input::onMouseMove(double xPos, double yPos) {
 }
 
 void Input::update(float deltaTime) {
+    bool tab = glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS;
+    if (tab && !tabPressed) {
+        mouseCaptured = !mouseCaptured;
+        glfwSetInputMode(window, GLFW_CURSOR, mouseCaptured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+    }
+
+    tabPressed = tab;
+
+    if (!mouseCaptured)
+        return;
+
     bool moveForward = glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS;
     bool moveBackward = glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS;
     bool moveLeft = glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS;
