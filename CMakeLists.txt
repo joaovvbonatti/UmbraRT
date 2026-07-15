@@ -9,7 +9,10 @@ add_executable(UmbraRT src/main.cpp
         include/Camera.h
         src/Camera.cpp
         include/Input.h
-        src/Input.cpp)
+        src/Input.cpp
+        include/Renderer.h
+        src/Renderer.cpp
+)
 
 target_include_directories(UmbraRT PRIVATE
         include

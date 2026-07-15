@@ -7,12 +7,12 @@
 
 #include <iostream>
 
-#include "Shader.h"
 #include "glm/glm.hpp"
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Camera.h"
 #include "Input.h"
+#include "Renderer.h"
 
 int width = 1600;
 int height = 900;
@@ -49,52 +49,19 @@ int main() {
     //Dear ImGui
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
-
     ImGui::StyleColorsDark();
-
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
     glViewport(0, 0, width, height);
 
-    Shader shader("shaders/vertex.vert", "shaders/fragment.frag");
-
-    float vertices[] =
-    {
-        -1.f,-1.f,0.f,
-         1.f,-1.f,0.f,
-        -1.f, 1.f,0.f,
-         1.f, 1.f,0.f
-    };
-
-    unsigned int indices[] = {
-        0, 1, 2,
-        1, 3, 2
-    };
-
-    unsigned int VAO;
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-
-    unsigned int VBO;
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    unsigned int EBO;
-    glGenBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
     glm::vec3 spherePosition(0.0);
 
     float lastFrame = glfwGetTime();
+
+    Renderer renderer;
 
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = glfwGetTime();
@@ -111,21 +78,9 @@ int main() {
         ImGui::DragFloat("Camera FOV", &camera.fov, 0.1f);
         ImGui::End();
 
-        shader.use();
-
         glfwGetFramebufferSize(window, &width, &height);
 
-        shader.setVec2("uResolution", glm::vec2(width, height));
-        shader.setVec3("uSpherePosition", spherePosition);
-        shader.setVec3("uCameraPosition", camera.position);
-        shader.setVec3("uCameraForward", camera.forward);
-        shader.setVec3("uCameraRight", camera.right);
-        shader.setVec3("uCameraUp", camera.up);
-        shader.setFloat("uCameraFov", camera.fov);
-
-
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        renderer.render(camera, spherePosition, width, height);
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -137,10 +92,8 @@ int main() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
-    glDeleteProgram(shader.id);
+
     glfwTerminate();
+
     return 0;
 }
