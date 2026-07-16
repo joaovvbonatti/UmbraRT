@@ -12,6 +12,8 @@ add_executable(UmbraRT src/main.cpp
         src/Input.cpp
         include/Renderer.h
         src/Renderer.cpp
+        include/Window.h
+        src/Window.cpp
 )
 
 target_include_directories(UmbraRT PRIVATE
