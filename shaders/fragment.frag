@@ -35,12 +35,25 @@ struct Plane{
     vec3 normal;
 };
 
+struct Material {
+    vec3 albedo;
+    float roughness;
+    float metallic;
+    float emission;
+};
+
 struct HitInfo{
     float t;
     vec3 position;
     vec3 normal;
-    vec3 color;
     bool hit;
+    Material material;
+};
+
+struct PointLight {
+    vec3 position;
+    vec3 color;
+    float intensity;
 };
 
 bool intersectSphere(Ray ray, Sphere sphere, out HitInfo hit) {
@@ -64,7 +77,7 @@ bool intersectSphere(Ray ray, Sphere sphere, out HitInfo hit) {
     hit.t = t;
     hit.position = ray.origin + ray.direction * t;
     hit.normal = normalize(hit.position - sphere.center);
-    hit.color = hit.normal * 0.5 + 0.5;;
+    hit.material.albedo = sphere.color;
 
     return true;
 }
@@ -89,7 +102,7 @@ bool intersectPlane(Ray ray, Plane plane, out HitInfo hit) {
 
     float checker = mod(floor(hit.position.x / tileSize) + floor(hit.position.z / tileSize), 2.0);
 
-    hit.color = mix(vec3(0.20), vec3(0.15), checker);
+    hit.material.albedo = mix(vec3(0.20), vec3(0.15), checker);
 
     return true;
 }
@@ -113,6 +126,16 @@ bool traceScene(Ray ray, Sphere sphere, Plane plane, out HitInfo hit) {
     return hit.hit;
 }
 
+vec3 computeLighting(HitInfo hit, PointLight light) {
+    vec3 L = light.position - hit.position;
+    float distance = length(L);
+    L = normalize(L);
+    float NdotL = max(dot(hit.normal, L), 0.0);
+    float attenuation = 1.0 / (distance * distance);
+
+    return hit.material.albedo * light.color * light.intensity * attenuation * NdotL;
+}
+
 void main() {
     vec2 uv = gl_FragCoord.xy / uResolution;
 
@@ -128,11 +151,16 @@ void main() {
     Sphere sphere;
     sphere.center = uSpherePosition;
     sphere.radius = 1.0;
-    sphere.color = vec3(1.0, 0.2, 0.2);
+    sphere.color = vec3(0.8, 0.2, 0.2);
 
     Plane plane;
     plane.point = vec3(0.0, -1.0, 0.0);
     plane.normal = vec3(0.0, 1.0, 0.0);
+
+    PointLight light;
+    light.position = vec3(0.0, 5.0, 0.0);
+    light.color = vec3(0.0, 1.0, 1.0);
+    light.intensity = 50.0;
 
     HitInfo hit;
 
@@ -143,9 +171,25 @@ void main() {
     vec3 color;
 
     if(traceScene(ray, sphere, plane, hit)) {
-        color = hit.color;
-    } else {
-        color = vec3(0.0, 0.0, 0.0);
+        vec3 ambient = vec3(0.1) * hit.material.albedo;
+        color = ambient;
+
+        color += computeLighting(hit, light);
+
+        Ray shadowRay;
+        shadowRay.origin = hit.position + hit.normal * 0.001;
+        shadowRay.direction = normalize(light.position - hit.position);
+
+        HitInfo shadowHit;
+
+        if (traceScene(shadowRay, sphere, plane, shadowHit)) {
+            float lightDistance =
+            length(light.position - hit.position);
+
+            if (shadowHit.t < lightDistance)
+                color = ambient;
+
+        }
     }
 
     FragColor = vec4(color, 1.0);

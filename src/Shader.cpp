@@ -36,6 +36,21 @@ Shader::Shader(const std::string& vertex_path, const std::string& fragment_path)
     glShaderSource(fragmentShader, 1, &fragment_source, nullptr);
     glCompileShader(fragmentShader);
 
+    GLint success;
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+
+    if (!success)
+    {
+        GLint logLength = 0;
+        glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &logLength);
+
+        std::vector<char> log(logLength);
+
+        glGetShaderInfoLog(fragmentShader, logLength, nullptr, log.data());
+
+        std::cerr << log.data();
+    }
+
     //Compiling and linking
     id = glCreateProgram();
 
