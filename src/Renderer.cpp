@@ -14,6 +14,7 @@ void Renderer::render(Camera camera, glm::vec3 spherePosition, int width, int he
     shader.setVec3("uCameraRight", camera.right);
     shader.setVec3("uCameraUp", camera.up);
     shader.setFloat("uCameraFov", camera.fov);
+    shader.setInt("uFrame", frameCount++);
 
     shader.use();
     glBindVertexArray(VAO);

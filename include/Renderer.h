@@ -10,4 +10,5 @@ public:
 private:
     unsigned int VAO = 0;
     Shader shader;
+    int frameCount = 0;
 };
