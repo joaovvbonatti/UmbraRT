@@ -219,11 +219,11 @@ void main() {
     sphere.emission = vec3(0.0);
 
     Sphere light;
-    light.center = vec3(0.0, 20, 0.0);
-    light.radius = 5;
+    light.center = vec3(0.0, 5, 0.0);
+    light.radius = 0.5;
     light.albedo = vec3(1.0);
     light.material = MATERIAL_EMISSIVE;
-    light.emission = vec3(2.0);
+    light.emission = vec3(1.0);
 
     Plane plane;
     plane.point = vec3(0.0, -1.0, 0.0);
