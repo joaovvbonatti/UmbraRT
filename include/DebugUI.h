@@ -8,5 +8,5 @@ public:
     ~DebugUI();
 
     void beginFrame();
-    void render(Camera& camera, glm::vec3& spherePos);
+    void render(Camera& camera);
 };

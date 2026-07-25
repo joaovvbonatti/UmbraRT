@@ -17,11 +17,17 @@ int main() {
 
     DebugUI ui(window.getHandle());
 
-    glm::vec3 spherePosition(0.0);
-
     float lastFrame = glfwGetTime();
 
     Renderer renderer;
+
+    Scene scene;
+    scene.addSphere(glm::vec3(3, 1, 3), glm::vec3(1.0), 1.0, 0.0);
+    scene.addSphere(glm::vec3(0, 2, -4), glm::vec3(1.0), 2.0, 0.0);
+    scene.addSphere(glm::vec3(0, 2, 2), glm::vec3(1.0, 0.0, 0.0), 0.5, 0.0);
+    scene.addSphere(glm::vec3(2, 5, 0), glm::vec3(0.0, 0.0, 1.0), 0.3, 3.0);
+    scene.addSphere(glm::vec3(0, 5, 2), glm::vec3(0.0, 1.0, 0), 0.3, 3.0);
+    scene.addSphere(glm::vec3(1, 5, 1), glm::vec3(1.0, 0.0, 0.0), 0.3, 3.0);
 
     while (!window.shouldClose()) {
         float currentFrame = glfwGetTime();
@@ -30,10 +36,10 @@ int main() {
 
         input.update(deltaTime);
 
-        renderer.render(camera, spherePosition, window.getWidth(), window.getHeight());
+        renderer.render(camera, scene, window.getWidth(), window.getHeight());
 
         ui.beginFrame();
-        ui.render(camera, spherePosition);
+        ui.render(camera);
 
         window.swapBuffers();
         window.pollEvents();

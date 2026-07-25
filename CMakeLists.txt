@@ -16,6 +16,10 @@ add_executable(UmbraRT src/main.cpp
         src/Window.cpp
         include/DebugUI.h
         src/DebugUI.cpp
+        include/Scene.h
+        src/Scene.cpp
+        include/Sphere.h
+        src/Sphere.cpp
 )
 
 target_include_directories(UmbraRT PRIVATE
@@ -24,6 +28,8 @@ target_include_directories(UmbraRT PRIVATE
         external/imgui
         external/imgui/backends
 )
+
+target_compile_definitions(UmbraRT PRIVATE GLFW_INCLUDE_NONE)
 
 add_subdirectory(external/glfw)
 

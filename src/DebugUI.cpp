@@ -28,10 +28,9 @@ void DebugUI::beginFrame() {
     ImGui::NewFrame();
 }
 
-void DebugUI::render(Camera& camera, glm::vec3& spherePos) {
+void DebugUI::render(Camera& camera) {
     ImGui::Begin("Debug");
 
-    ImGui::DragFloat3("Sphere position", glm::value_ptr(spherePos), 0.01f);
     ImGui::DragFloat("Camera FOV", &camera.fov, 0.1f);
 
     ImGui::End();

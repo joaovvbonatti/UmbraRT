@@ -1,19 +1,28 @@
 #version 330 core
 out vec4 FragColor;
 
+const int MAX_SPHERES = 10;
+
+struct Sphere {
+    vec4 positionRadius;
+    vec4 albedoEmission;
+};
+
+layout(std140) uniform SphereBuffer
+{
+    Sphere spheres[MAX_SPHERES];
+};
+
+uniform int uSphereCount;
+
 uniform vec2 uResolution;
 uniform int uFrame;
-
-uniform vec3 uSpherePosition;
 
 uniform vec3 uCameraPosition;
 uniform vec3 uCameraForward;
 uniform vec3 uCameraRight;
 uniform vec3 uCameraUp;
 uniform float uCameraFov;
-
-const int MATERIAL_DIFFUSE = 0;
-const int MATERIAL_EMISSIVE = 1;
 
 uint pcg_hash(uint num)
 {
@@ -71,15 +80,6 @@ struct Ray{
     vec3 direction;
 };
 
-struct Sphere{
-    vec3 center;
-    float radius;
-    int material;
-
-    vec3 albedo;
-    vec3 emission;
-};
-
 struct Plane{
     vec3 point;
     vec3 normal;
@@ -93,13 +93,12 @@ struct HitInfo
     vec3 normal;
 
     vec3 albedo;
-    vec3 emission;
+    float emission;
 
-    int material;
+    bool emissive;
 
     bool hit;
 };
-
 
 vec3 sampleSphere(Sphere light, inout uint rng)
 {
@@ -110,16 +109,15 @@ vec3 sampleSphere(Sphere light, inout uint rng)
 
     vec3 dir = vec3(r*cos(phi), r*sin(phi), z);
 
-    return light.center + dir * light.radius;
+    return light.positionRadius.xyz + dir * light.positionRadius.w;
 }
 
-
 bool intersectSphere(Ray ray, Sphere sphere, out HitInfo hit) {
-    vec3 oc = ray.origin - sphere.center;
+    vec3 oc = ray.origin - sphere.positionRadius.xyz;
 
     float a = dot(ray.direction, ray.direction);
     float b = 2.0 * dot(oc, ray.direction);
-    float c = dot(oc, oc) - sphere.radius * sphere.radius;
+    float c = dot(oc, oc) - sphere.positionRadius.w * sphere.positionRadius.w;
 
     float delta = b*b - 4.0*a*c;
 
@@ -134,10 +132,10 @@ bool intersectSphere(Ray ray, Sphere sphere, out HitInfo hit) {
     hit.hit = true;
     hit.t = t;
     hit.position = ray.origin + ray.direction * t;
-    hit.normal = normalize(hit.position - sphere.center);
-    hit.albedo = sphere.albedo;
-    hit.material = sphere.material;
-    hit.emission = sphere.emission;
+    hit.normal = normalize(hit.position - sphere.positionRadius.xyz);
+    hit.albedo = sphere.albedoEmission.xyz;
+    hit.emission = sphere.albedoEmission.w;
+    hit.emissive = sphere.albedoEmission.w > 0.0;
 
     return true;
 }
@@ -163,122 +161,119 @@ bool intersectPlane(Ray ray, Plane plane, out HitInfo hit) {
     float checker = mod(floor(hit.position.x / tileSize) + floor(hit.position.z / tileSize), 2.0);
 
     hit.albedo = mix(vec3(0.20), vec3(0.15), checker);
+    hit.emission = 0.0;
+    hit.emissive = false;
 
     return true;
 }
 
-bool traceScene(Ray ray, Sphere sphere, Sphere light, Plane plane, out HitInfo hit) {
+bool traceScene(Ray ray, Plane plane, out HitInfo hit) {
     hit.hit = false;
     hit.t = 1e30;
 
     HitInfo temp;
 
-    if(intersectSphere(ray, sphere, temp)) {
-        if(temp.t < hit.t)
+    for(int i = 0; i < uSphereCount; i++) {
+        if(intersectSphere(ray, spheres[i], temp)) {
+            if(temp.t < hit.t) {
                 hit = temp;
+            }
+        }
     }
 
     if(intersectPlane(ray, plane, temp)) {
         if(temp.t < hit.t) {
             hit = temp;
-            hit.material = MATERIAL_DIFFUSE;
-            hit.emission = vec3(0.0);
+            hit.emission = 0.0;
         }
-    }
-
-    if(intersectSphere(ray, light, temp))
-    {
-        if(temp.t < hit.t)
-            hit = temp;
     }
 
     return hit.hit;
 }
 
-vec3 skyColor = vec3(0.0);
-
 void main() {
     uint rng = uint(gl_FragCoord.x) + uint(gl_FragCoord.y)*4096u + uint(uFrame)*16777619u;
 
     vec2 uv = gl_FragCoord.xy / uResolution;
-
     uv = uv * 2.0 - 1.0;
     uv.x *= uResolution.x / uResolution.y;
-
-
     float scale = tan(radians(uCameraFov * 0.5));
-
-    vec3 rayDir =
-    normalize(uCameraForward + uv.x * scale * uCameraRight + uv.y * scale * uCameraUp);
-
-    Sphere sphere;
-    sphere.center = uSpherePosition;
-    sphere.radius = 1.0;
-    sphere.albedo = vec3(0.8, 0.2, 0.2);
-    sphere.material = MATERIAL_DIFFUSE;
-    sphere.emission = vec3(0.0);
-
-    Sphere light;
-    light.center = vec3(0.0, 5, 0.0);
-    light.radius = 0.5;
-    light.albedo = vec3(1.0);
-    light.material = MATERIAL_EMISSIVE;
-    light.emission = vec3(1.0);
+    vec3 rayDir = normalize(uCameraForward + uv.x * scale * uCameraRight + uv.y * scale * uCameraUp);
 
     Plane plane;
     plane.point = vec3(0.0, -1.0, 0.0);
     plane.normal = vec3(0.0, 1.0, 0.0);
 
-    HitInfo hit;
-
     Ray ray;
     ray.origin = uCameraPosition;
     ray.direction = rayDir;
 
-    vec3 color;
-
     vec3 throughput = vec3(1.0);
+
     vec3 radiance = vec3(0.0);
 
-    for(int bounce = 0; bounce < 100; bounce++) {
-        if(!traceScene(ray, sphere, light, plane, hit)) {
-            radiance += throughput * skyColor;
+
+    for (int bounce = 0; bounce < 100; bounce++)
+    {
+        HitInfo hit;
+
+        if (!traceScene(ray, plane, hit)) {
             break;
         }
 
-        ray.origin = hit.position + hit.normal * 0.001;
+        if (hit.emission > 0.0) {
+            radiance += throughput * hit.albedo * hit.emission;
+            break;
+        }
 
-        if(hit.material == MATERIAL_EMISSIVE)
+        for (int i = 0; i < uSphereCount; i++)
         {
-            radiance += throughput * hit.emission;
-            break;
-        }
+            Sphere light =
+            spheres[i];
 
-        vec3 lightPoint = sampleSphere(light, rng);
-        vec3 toLight = lightPoint - hit.position;
-        float lightDistance = length(toLight);
-        vec3 lightDir = toLight / lightDistance;
-        Ray shadowRay;
-        shadowRay.origin =
-        hit.position + hit.normal * 0.001;
-        shadowRay.direction = lightDir;
-        HitInfo shadowHit;
+            float lightEmission =
+            light.albedoEmission.w;
 
-        if(traceScene(shadowRay, sphere, light, plane, shadowHit)) {
-            if(shadowHit.material == MATERIAL_EMISSIVE && shadowHit.t < lightDistance + 0.001) {
-                float NdotL = max(dot(hit.normal, lightDir),0.0);
+            if (lightEmission <= 0.0) {
+                continue;
+            }
 
-                radiance += throughput * hit.albedo * light.emission * NdotL;
+            vec3 lightPoint = sampleSphere(light, rng);
+
+            vec3 toLight = lightPoint - hit.position;
+
+            float lightDistance = length(toLight);
+
+            vec3 lightDirection = toLight / lightDistance;
+
+            float NdotL = max(dot(hit.normal, lightDirection), 0.0);
+
+            if (NdotL <= 0.0) {
+                continue;
+            }
+
+            Ray visibilityRay;
+
+            visibilityRay.origin = hit.position + hit.normal * 0.001;
+
+            visibilityRay.direction = lightDirection;
+
+            HitInfo lightHit;
+
+            if (traceScene(visibilityRay, plane, lightHit)) {
+                if (lightHit.emission > 0.0) {
+                    vec3 lightRadiance = lightHit.albedo * lightHit.emission;
+                    radiance += throughput * hit.albedo * lightRadiance * NdotL;
+                }
             }
         }
 
-
         throughput *= hit.albedo;
+
+        ray.origin = hit.position + hit.normal * 0.001;
 
         ray.direction = cosineSampleHemisphere(hit.normal, rng);
     }
 
-    color = radiance;
-
-    FragColor = vec4(color, 1.0);
+    FragColor = vec4(radiance / (radiance + vec3(1.0)), 1.0);
 }
