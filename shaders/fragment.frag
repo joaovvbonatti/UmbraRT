@@ -194,7 +194,10 @@ bool traceScene(Ray ray, Plane plane, out HitInfo hit) {
 void main() {
     uint rng = uint(gl_FragCoord.x) + uint(gl_FragCoord.y)*4096u + uint(uFrame)*16777619u;
 
-    vec2 uv = gl_FragCoord.xy / uResolution;
+    vec2 jitter = vec2(random(rng), random(rng)) - 0.5;
+    vec2 pixelCoord = gl_FragCoord.xy + jitter;
+
+    vec2 uv = pixelCoord / uResolution;
     uv = uv * 2.0 - 1.0;
     uv.x *= uResolution.x / uResolution.y;
     float scale = tan(radians(uCameraFov * 0.5));
