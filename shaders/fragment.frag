@@ -275,5 +275,5 @@ void main() {
         ray.direction = cosineSampleHemisphere(hit.normal, rng);
     }
 
-    FragColor = vec4(radiance / (radiance + vec3(1.0)), 1.0);
+    FragColor = vec4(radiance, 1.0);
 }

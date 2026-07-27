@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
 #include "Sphere.h"
-#include "glm/vec3.hpp"
 
 class Scene {
 public:
