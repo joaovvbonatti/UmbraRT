@@ -9,7 +9,7 @@ class Renderer {
 public:
     Renderer();
     ~Renderer();
-    void render(Camera camera, Scene scene, int width, int height);
+    void render(Camera& camera, Scene& scene, int width, int height);
 
 private:
     unsigned int VAO = 0;

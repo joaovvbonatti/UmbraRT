@@ -67,7 +67,7 @@ bool Renderer::cameraChanged(const Camera& camera) const {
     return false;
 }
 
-void Renderer::render(Camera camera, Scene scene, int width, int height) {
+void Renderer::render(Camera& camera, Scene& scene, int width, int height) {
     if (width != accumWidth || height != accumHeight) {
         createAccumBuffer(width, height);
     }

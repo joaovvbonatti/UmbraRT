@@ -89,6 +89,7 @@ List of Renderer Backends:
     imgui_impl_dx11.cpp         ; DirectX11
     imgui_impl_dx12.cpp         ; DirectX12
     imgui_impl_metal.mm         ; Metal (ObjC or C++)
+    imgui_impl_metal4.mm        ; Metal 4 (ObjC or C++)
     imgui_impl_opengl2.cpp      ; OpenGL 2 (legacy fixed pipeline. Don't use with modern OpenGL code!)
     imgui_impl_opengl3.cpp      ; OpenGL 3/4, OpenGL ES 2/3, WebGL
     imgui_impl_sdlgpu3.cpp      ; SDL_GPU (portable 3D graphics API of SDL3)
@@ -116,7 +117,7 @@ If you are not sure which backend to use, the recommended platform/frameworks fo
 | GLFW | https://github.com/glfw/glfw | imgui_impl_glfw.cpp | |
 | Sokol | https://github.com/floooh/sokol | [util/sokol_imgui.h](https://github.com/floooh/sokol/blob/master/util/sokol_imgui.h) | Lower-level than GLFW/SDL |
 
-If your application runs on Windows or if you are using multi-viewport, the win32 backend handles some details a little better than other backends.
+If your application runs on Windows or if you are using multi-viewports, the imgui_impl_win32 backend handles some details better than other backends.
 
 ## Using third-party Backends
 
@@ -183,6 +184,7 @@ The Platform backends in impl_impl_XXX.cpp files contain many implementations.
   - `ImGuiBackendFlags_HasSetMousePos`: supports io.WantSetMousePos requests to reposition the OS mouse position (only used if io.ConfigNavMoveSetMousePos is set).
   - `ImGuiBackendFlags_PlatformHasViewports` supports multiple viewports. (multi-viewports only)
   - `ImGuiBackendFlags_HasMouseHoveredViewport` supports calling io.AddMouseViewportEvent() with the viewport under the mouse. IF POSSIBLE, ignore viewports with the ImGuiViewportFlags_NoInputs flag. If this cannot be done, Dear ImGui needs to use a flawed heuristic to find the viewport under mouse position, as it doesn't know about foreign windows. (multi-viewports only)
+  - `ImGuiBackendFlags_HasParentViewport` supports honoring viewport->ParentViewportId value, by applying the corresponding parent/child relation at the Platform level.
 
 **In your `ImGui_ImplXXX_NewFrame()` function:**
 - Set `io.DeltaTime` to the time elapsed (in seconds) since last frame.

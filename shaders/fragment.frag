@@ -67,14 +67,6 @@ vec3 cosineSampleHemisphere(vec3 normal, inout uint rng)
     );
 }
 
-struct Camera{
-    vec3 position;
-    vec3 forward;
-    vec3 up;
-    vec3 right;
-    float fov;
-};
-
 struct Ray{
     vec3 origin;
     vec3 direction;

@@ -5,7 +5,7 @@ void Scene::addSphere(glm::vec3 position, glm::vec3 albedo, float radius, float 
     sphereCount++;
 }
 
-const std::vector<Sphere> Scene::getSpheres() const {
+const std::vector<Sphere>& Scene::getSpheres() const {
     return spheres;
 }
 
