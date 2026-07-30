@@ -9,8 +9,10 @@ class Renderer {
 public:
     Renderer();
     ~Renderer();
-    void render(Camera& camera, Scene& scene, int width, int height);
+    void render(Camera& camera, Scene& scene);
 
+    GLuint getRenderTexture();
+    void setViewportSize(int width, int height);
 private:
     unsigned int VAO = 0;
     Shader shader;
@@ -19,6 +21,9 @@ private:
 
     void sendToGPU(const Scene& scene);
     GLuint sphereUBO;
+
+    GLuint presentFBO = 0;
+    GLuint presentTexture = 0;
 
     GLuint accumFBO = 0;
     GLuint accumTexture = 0;
@@ -32,4 +37,7 @@ private:
     void createAccumBuffer(int width, int height);
     void resetAccumulation();
     bool cameraChanged(const Camera& camera) const;
+
+    int viewportWidth = 1;
+    int viewportHeight = 1;
 };

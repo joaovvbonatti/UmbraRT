@@ -28,15 +28,44 @@ void DebugUI::beginFrame() {
     ImGui_ImplGlfw_NewFrame();
 
     ImGui::NewFrame();
+    ImGui::DockSpaceOverViewport();
 }
 
-void DebugUI::render(Camera& camera) {
-    ImGui::Begin("Debug");
 
-    ImGui::DragFloat("Camera FOV", &camera.fov, 0.1f);
+void DebugUI::drawScenePanel(Scene &scene) {
+    ImGui::Begin("Scene");
+    ImGui::Text("Objects");
+    ImGui::End();
+
+}
+
+void DebugUI::drawCameraPanel(Camera &camera) {
+    ImGui::Begin("Camera");
+    ImGui::Text("Camera");
+    ImGui::End();
+
+}
+
+void DebugUI::drawRenderPanel(Renderer &renderer) {
+    ImGui::Begin("Renderer");
+    ImGui::Text("Renderer");
+    ImGui::End();
+
+}
+
+void DebugUI::drawViewport(Renderer& renderer) {
+    ImGui::Begin("Viewport");
+
+    ImVec2 viewportSize = ImGui::GetContentRegionAvail();
+    renderer.setViewportSize(static_cast<int>(viewportSize.x), static_cast<int>(viewportSize.y));
+
+    ImGui::Image((ImTextureID)(intptr_t)renderer.getRenderTexture(), viewportSize,ImVec2(0.0f, 1.0f),ImVec2(1.0f, 0.0f));
 
     ImGui::End();
 
+}
+
+void DebugUI::endFrame() {
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

@@ -40,10 +40,80 @@ void Renderer::createAccumBuffer(int width, int height) {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     resetAccumulation();
+
+    glGenTextures(1, &presentTexture);
+
+    glBindTexture(GL_TEXTURE_2D, presentTexture);
+
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA8,
+        width,
+        height,
+        0,
+        GL_RGBA,
+        GL_UNSIGNED_BYTE,
+        nullptr
+    );
+
+    glTexParameteri(
+        GL_TEXTURE_2D,
+        GL_TEXTURE_MIN_FILTER,
+        GL_LINEAR
+    );
+
+    glTexParameteri(
+        GL_TEXTURE_2D,
+        GL_TEXTURE_MAG_FILTER,
+        GL_LINEAR
+    );
+
+    glTexParameteri(
+        GL_TEXTURE_2D,
+        GL_TEXTURE_WRAP_S,
+        GL_CLAMP_TO_EDGE
+    );
+
+    glTexParameteri(
+        GL_TEXTURE_2D,
+        GL_TEXTURE_WRAP_T,
+        GL_CLAMP_TO_EDGE
+    );
+
+
+    // ==============================
+    // Present FBO
+    // ==============================
+
+    glGenFramebuffers(
+        1,
+        &presentFBO
+    );
+
+    glBindFramebuffer(
+        GL_FRAMEBUFFER,
+        presentFBO
+    );
+
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D,
+        presentTexture,
+        0
+    );
+
+
+    glBindFramebuffer(
+        GL_FRAMEBUFFER,
+        0
+    );
 }
 
 void Renderer::resetAccumulation() {
     sampleCount = 0;
+    frameCount = 0;
 
     glBindFramebuffer(GL_FRAMEBUFFER, accumFBO);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -67,7 +137,10 @@ bool Renderer::cameraChanged(const Camera& camera) const {
     return false;
 }
 
-void Renderer::render(Camera& camera, Scene& scene, int width, int height) {
+void Renderer::render(Camera& camera, Scene& scene) {
+    int width = viewportWidth;
+    int height = viewportHeight;
+
     if (width != accumWidth || height != accumHeight) {
         createAccumBuffer(width, height);
     }
@@ -81,40 +154,56 @@ void Renderer::render(Camera& camera, Scene& scene, int width, int height) {
 
     sendToGPU(scene);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, accumFBO);
-    glViewport(0, 0, accumWidth, accumHeight);
+    glBindFramebuffer(GL_FRAMEBUFFER,accumFBO);
+
+    glViewport(0,0, accumWidth, accumHeight);
 
     shader.use();
-    shader.setVec2("uResolution", glm::vec2(width, height));
+
+    shader.setVec2("uResolution",glm::vec2(width, height));
     shader.setVec3("uCameraPosition", camera.position);
     shader.setVec3("uCameraForward", camera.forward);
     shader.setVec3("uCameraRight", camera.right);
     shader.setVec3("uCameraUp", camera.up);
     shader.setFloat("uCameraFov", camera.fov);
-    shader.setInt("uFrame", frameCount++);
+    shader.setInt("uFrame", frameCount);
     shader.setInt("uSphereCount", scene.getSphereCount());
 
+
     glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE);
+
+    glBlendEquation(GL_FUNC_ADD);
+
+    glBlendFunc(GL_ONE,GL_ONE);
 
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+
+    glDrawArrays(GL_TRIANGLES,0,3);
 
     glDisable(GL_BLEND);
 
+    frameCount++;
     sampleCount++;
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, width, height);
+    glBindFramebuffer(GL_FRAMEBUFFER,presentFBO);
+
+    glViewport(0,0,width, height);
 
     presentShader.use();
+
     glActiveTexture(GL_TEXTURE0);
+
     glBindTexture(GL_TEXTURE_2D, accumTexture);
-    presentShader.setInt("uAccum", 0);
+
+    presentShader.setInt("uAccum",0);
+
     presentShader.setInt("uSampleCount", sampleCount);
 
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+
+    glDrawArrays(GL_TRIANGLES,0,3);
+
+    glBindFramebuffer(GL_FRAMEBUFFER,0);
 }
 
 struct gpuSphere {
@@ -139,6 +228,16 @@ void Renderer::sendToGPU(const Scene &scene) {
     glBindBufferBase(GL_UNIFORM_BUFFER,0,sphereUBO);
     glBindBuffer(GL_UNIFORM_BUFFER,0);
 }
+
+GLuint Renderer::getRenderTexture() {
+    return presentTexture;
+}
+
+void Renderer::setViewportSize(int width, int height) {
+    viewportWidth = width;
+    viewportHeight = height;
+}
+
 
 Renderer::~Renderer() {
     glDeleteProgram(shader.id);

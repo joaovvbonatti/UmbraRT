@@ -36,10 +36,14 @@ int main() {
 
         input.update(deltaTime);
 
-        renderer.render(camera, scene, window.getWidth(), window.getHeight());
+        renderer.render(camera, scene);
 
         ui.beginFrame();
-        ui.render(camera);
+        ui.drawCameraPanel(camera);
+        ui.drawScenePanel(scene);
+        ui.drawRenderPanel(renderer);
+        ui.drawViewport(renderer);
+        ui.endFrame();
 
         window.swapBuffers();
         window.pollEvents();
