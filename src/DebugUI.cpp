@@ -41,7 +41,13 @@ void DebugUI::drawScenePanel(Scene &scene) {
 
 void DebugUI::drawCameraPanel(Camera &camera) {
     ImGui::Begin("Camera");
-    ImGui::Text("Camera");
+    ImGui::DragFloat("FoV", &camera.fov, 0.1);
+    ImGui::DragFloat3("Position", glm::value_ptr(camera.position), 0.1);
+
+    ImGui::DragFloat("Pitch", &camera.pitch, 0.1);
+    ImGui::DragFloat("Yaw", &camera.yaw, 0.1);
+    camera.updateVectors();
+
     ImGui::End();
 
 }
