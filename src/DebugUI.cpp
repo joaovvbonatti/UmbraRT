@@ -33,13 +33,16 @@ void DebugUI::beginFrame() {
 }
 
 
-void DebugUI::drawScenePanel(Scene &scene) {
+bool DebugUI::drawScenePanel(Scene &scene) {
+    bool changed = false;
+
     std::vector<Sphere>& spheres = scene.getSpheres();
 
     ImGui::Begin("Scene");
 
     if (ImGui::Button("Add sphere")) {
         scene.addSphere(glm::vec3(0.0, 1.0, 0.0), glm::vec3(1.0), 1.0, 0.0);
+        changed = true;
     }
 
 
@@ -52,38 +55,47 @@ void DebugUI::drawScenePanel(Scene &scene) {
 
     if (scene.selectedSphere != -1) {
         ImGui::Begin("Editor");
-        ImGui::DragFloat3("Position", glm::value_ptr(spheres[scene.selectedSphere].position), 0.1);
-        ImGui::DragFloat("Radius", &spheres[scene.selectedSphere].radius);
-        ImGui::ColorPicker3("Albedo", glm::value_ptr(spheres[scene.selectedSphere].albedo));
-        ImGui::DragFloat("Emission", &spheres[scene.selectedSphere].emission, 0.1);
+        changed |= ImGui::DragFloat3("Position", glm::value_ptr(spheres[scene.selectedSphere].position), 0.1);
+        changed |= ImGui::DragFloat("Radius", &spheres[scene.selectedSphere].radius, 0.01);
+        changed |= ImGui::ColorPicker3("Albedo", glm::value_ptr(spheres[scene.selectedSphere].albedo));
+        changed |= ImGui::DragFloat("Emission", &spheres[scene.selectedSphere].emission, 0.1);
         ImGui::End();
     }
 
     ImGui::End();
 
+    return changed;
 }
 
-void DebugUI::drawCameraPanel(Camera &camera) {
-    ImGui::Begin("Camera");
-    ImGui::DragFloat("FoV", &camera.fov, 0.1);
-    ImGui::DragFloat3("Position", glm::value_ptr(camera.position), 0.1);
+bool DebugUI::drawCameraPanel(Camera &camera) {
+    bool changed = false;
 
-    ImGui::DragFloat("Pitch", &camera.pitch, 0.1);
-    ImGui::DragFloat("Yaw", &camera.yaw, 0.1);
+    ImGui::Begin("Camera");
+
+    changed |= ImGui::DragFloat("FoV", &camera.fov, 0.1);
+    changed |= ImGui::DragFloat3("Position", glm::value_ptr(camera.position), 0.1);
+    changed |= ImGui::DragFloat("Pitch", &camera.pitch, 0.1);
+    changed |= ImGui::DragFloat("Yaw", &camera.yaw, 0.1);
+
     camera.updateVectors();
 
     ImGui::End();
 
+    return changed;
 }
 
-void DebugUI::drawRenderPanel(Renderer &renderer) {
+bool DebugUI::drawRenderPanel(Renderer &renderer) {
+    bool changed;
+
     ImGui::Begin("Renderer");
+
     ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
     ImGui::Text("Frame Time: %.3f ms", 1000.0f / ImGui::GetIO().Framerate);
     ImGui::Text("Viewport width: %i", renderer.viewportWidth);
     ImGui::Text("Viewport height: %i", renderer.viewportHeight);
     ImGui::End();
 
+    return false;
 }
 
 void DebugUI::drawViewport(Renderer& renderer) {

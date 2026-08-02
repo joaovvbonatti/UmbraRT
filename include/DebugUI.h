@@ -13,8 +13,8 @@ public:
     void render(Camera& camera);
     void endFrame();
 
-    void drawScenePanel(Scene& scene);
-    void drawCameraPanel(Camera& camera);
-    void drawRenderPanel(Renderer& renderer);
+    bool drawScenePanel(Scene& scene);
+    bool drawCameraPanel(Camera& camera);
+    bool drawRenderPanel(Renderer& renderer);
     void drawViewport(Renderer& renderer);
 };

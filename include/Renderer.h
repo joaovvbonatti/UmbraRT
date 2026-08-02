@@ -15,6 +15,8 @@ public:
     void setViewportSize(int width, int height);
     int viewportWidth = 1;
     int viewportHeight = 1;
+
+    void resetAccumulation();
 private:
     unsigned int VAO = 0;
     Shader shader;
@@ -37,6 +39,5 @@ private:
     bool hasLastCamera = false;
 
     void createAccumBuffer(int width, int height);
-    void resetAccumulation();
     bool cameraChanged(const Camera& camera) const;
 };

@@ -7,6 +7,7 @@
 #include "Input.h"
 #include "Renderer.h"
 #include "Window.h"
+#include "Scene.h"
 
 int main() {
     Window window(1600, 900);
@@ -38,12 +39,18 @@ int main() {
 
         renderer.render(camera, scene);
 
+        bool changed = false;
+
         ui.beginFrame();
-        ui.drawCameraPanel(camera);
-        ui.drawScenePanel(scene);
-        ui.drawRenderPanel(renderer);
+        changed |= ui.drawCameraPanel(camera);
+        changed |= ui.drawScenePanel(scene);
+        changed |= ui.drawRenderPanel(renderer);
         ui.drawViewport(renderer);
         ui.endFrame();
+
+        if (changed) {
+            renderer.resetAccumulation();
+        }
 
         window.swapBuffers();
         window.pollEvents();
