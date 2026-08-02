@@ -211,10 +211,10 @@ struct gpuSphere {
     glm::vec4 albedoEmission;
 };
 
-void Renderer::sendToGPU(const Scene &scene) {
+void Renderer::sendToGPU(Scene &scene) {
     std::vector<gpuSphere> gpuSpheres;
 
-    for (const Sphere& sphere : scene.getSpheres()) {
+    for (Sphere& sphere : scene.getSpheres()) {
         gpuSphere data;
 
         data.positionRadius = glm::vec4(sphere.getPosition(), sphere.getRadius());

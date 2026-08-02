@@ -17,7 +17,6 @@ public:
     float getEmission() const;
     void setEmission(float emission);
 
-private:
     glm::vec3 position;
     glm::vec3 albedo;
     float radius;

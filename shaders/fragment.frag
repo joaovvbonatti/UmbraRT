@@ -208,7 +208,7 @@ void main() {
     vec3 radiance = vec3(0.0);
 
 
-    for (int bounce = 0; bounce < 100; bounce++)
+    for (int bounce = 0; bounce < 10; bounce++)
     {
         HitInfo hit;
 

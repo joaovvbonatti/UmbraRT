@@ -4,6 +4,7 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "glm/gtc/type_ptr.hpp"
+#include <iostream>
 
 DebugUI::DebugUI(GLFWwindow* window) {
     IMGUI_CHECKVERSION();
@@ -33,8 +34,31 @@ void DebugUI::beginFrame() {
 
 
 void DebugUI::drawScenePanel(Scene &scene) {
+    std::vector<Sphere>& spheres = scene.getSpheres();
+
     ImGui::Begin("Scene");
-    ImGui::Text("Objects");
+
+    if (ImGui::Button("Add sphere")) {
+        scene.addSphere(glm::vec3(0.0, 1.0, 0.0), glm::vec3(1.0), 1.0, 0.0);
+    }
+
+
+    for (int i = 0; i < spheres.size(); i++) {
+        if (ImGui::Selectable(("Sphere " + std::to_string(i)).c_str(), scene.selectedSphere == i))
+            scene.selectedSphere = i;
+    }
+
+    std::cout << scene.selectedSphere << std::endl;
+
+    if (scene.selectedSphere != -1) {
+        ImGui::Begin("Editor");
+        ImGui::DragFloat3("Position", glm::value_ptr(spheres[scene.selectedSphere].position), 0.1);
+        ImGui::DragFloat("Radius", &spheres[scene.selectedSphere].radius);
+        ImGui::ColorPicker3("Albedo", glm::value_ptr(spheres[scene.selectedSphere].albedo));
+        ImGui::DragFloat("Emission", &spheres[scene.selectedSphere].emission, 0.1);
+        ImGui::End();
+    }
+
     ImGui::End();
 
 }
@@ -54,7 +78,10 @@ void DebugUI::drawCameraPanel(Camera &camera) {
 
 void DebugUI::drawRenderPanel(Renderer &renderer) {
     ImGui::Begin("Renderer");
-    ImGui::Text("Renderer");
+    ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+    ImGui::Text("Frame Time: %.3f ms", 1000.0f / ImGui::GetIO().Framerate);
+    ImGui::Text("Viewport width: %i", renderer.viewportWidth);
+    ImGui::Text("Viewport height: %i", renderer.viewportHeight);
     ImGui::End();
 
 }

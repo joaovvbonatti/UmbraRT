@@ -13,13 +13,15 @@ public:
 
     GLuint getRenderTexture();
     void setViewportSize(int width, int height);
+    int viewportWidth = 1;
+    int viewportHeight = 1;
 private:
     unsigned int VAO = 0;
     Shader shader;
     Shader presentShader;
     int frameCount = 0;
 
-    void sendToGPU(const Scene& scene);
+    void sendToGPU(Scene& scene);
     GLuint sphereUBO;
 
     GLuint presentFBO = 0;
@@ -37,7 +39,4 @@ private:
     void createAccumBuffer(int width, int height);
     void resetAccumulation();
     bool cameraChanged(const Camera& camera) const;
-
-    int viewportWidth = 1;
-    int viewportHeight = 1;
 };
