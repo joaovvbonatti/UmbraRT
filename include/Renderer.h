@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AccumulationBuffer.h"
 #include "Camera.h"
 #include "Scene.h"
 #include "Shader.h"
@@ -28,16 +29,10 @@ private:
 
     GLuint presentFBO = 0;
     GLuint presentTexture = 0;
+    int presentWidth = 0;
+    int presentHeight = 0;
 
-    GLuint accumFBO = 0;
-    GLuint accumTexture = 0;
-    int accumWidth = 0;
-    int accumHeight = 0;
-    int sampleCount = 0;
+    AccumulationBuffer accumulation;
 
-    Camera lastCamera{};
-    bool hasLastCamera = false;
-
-    void createAccumBuffer(int width, int height);
-    bool cameraChanged(const Camera& camera) const;
+    void createPresentBuffer(int width, int height);
 };

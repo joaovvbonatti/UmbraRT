@@ -6,6 +6,8 @@ class Camera {
 public:
     Camera();
 
+    bool operator==(const Camera&) const = default;
+
     void updateVectors();
 
     void processKeyboard(bool forward, bool backward, bool left, bool right, float deltaTime);

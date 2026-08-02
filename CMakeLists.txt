@@ -20,6 +20,8 @@ add_executable(UmbraRT src/main.cpp
         src/Scene.cpp
         include/Sphere.h
         src/Sphere.cpp
+        include/AccumulationBuffer.h
+        src/AccumulationBuffer.cpp
 )
 
 target_include_directories(UmbraRT PRIVATE

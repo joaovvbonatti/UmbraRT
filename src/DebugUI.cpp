@@ -51,8 +51,6 @@ bool DebugUI::drawScenePanel(Scene &scene) {
             scene.selectedSphere = i;
     }
 
-    std::cout << scene.selectedSphere << std::endl;
-
     if (scene.selectedSphere != -1) {
         ImGui::Begin("Editor");
         changed |= ImGui::DragFloat3("Position", glm::value_ptr(spheres[scene.selectedSphere].position), 0.1);
