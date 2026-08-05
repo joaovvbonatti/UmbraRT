@@ -15,7 +15,7 @@ std::string Shader::readFile(const std::string& path) {
     std::stringstream buffer;
     buffer << file.rdbuf();
 
-    std::cout << "Shader file read successfully.";
+    std::cout << "Shader file read successfully." << std::endl;
     return buffer.str();
 }
 

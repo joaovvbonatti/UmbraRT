@@ -12,8 +12,6 @@ Renderer::Renderer()
 }
 
 void Renderer::render(Camera& camera, Scene& scene) {
-    printf("render\n");
-
     accumulation.resize(viewportWidth, viewportHeight);
 
     if (accumulation.cameraChanged(camera)) {
@@ -100,13 +98,10 @@ void Renderer::sendToGPU(Scene &scene) {
 }
 
 GLuint Renderer::getRenderTexture() {
-    printf("Returning texture %u\n", presentTexture);
     return presentTexture;
 }
 
 void Renderer::setViewportSize(int width, int height) {
-    printf("Viewport %d %d\n", width, height);
-
     viewportWidth = width;
     viewportHeight = height;
 
@@ -193,9 +188,6 @@ void Renderer::createPresentBuffer(int width, int height) {
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    printf("presentTexture = %u\n", presentTexture);
-    printf("presentFBO = %u\n", presentFBO);
 
     presentWidth = width;
     presentHeight = height;

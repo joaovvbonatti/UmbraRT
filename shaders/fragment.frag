@@ -159,7 +159,51 @@ bool intersectPlane(Ray ray, Plane plane, out HitInfo hit) {
     return true;
 }
 
-bool traceScene(Ray ray, Plane plane, out HitInfo hit) {
+struct Box {
+    vec3 min;
+    vec3 max;
+    vec3 albedo;
+    float emission;
+};
+
+bool intersectBox(Ray ray, Box box, out HitInfo hit) { //slab method
+     vec3 invDir = 1.0 / ray.direction;
+
+     vec3 t0 = (box.min - ray.origin) * invDir;
+     vec3 t1 = (box.max - ray.origin) * invDir;
+
+     vec3 tMin = min(t0, t1);
+     vec3 tMax = max(t0, t1);
+
+     float tNear = max(max(tMin.x, tMin.y), tMin.z);
+     float tFar = min(min(tMax.x, tMax.y), tMax.z);
+
+     if(tNear > tFar || tFar < 0.0)
+     return false;
+
+     float t = tNear > 0.0 ? tNear : tFar;
+
+     hit.t = t;
+     hit.position = ray.origin + ray.direction * t;
+
+     const float eps = 1e-4;
+
+    if (tNear == tMin.x)
+        hit.normal = ray.direction.x > 0.0 ? vec3(-1,0,0) : vec3(1,0,0);
+    else if (tNear == tMin.y)
+        hit.normal = ray.direction.y > 0.0 ? vec3(0,-1,0) : vec3(0,1,0);
+    else
+        hit.normal = ray.direction.z > 0.0 ? vec3(0,0,-1) : vec3(0,0,1);
+
+     hit.albedo = box.albedo;
+     hit.emission = box.emission;
+     hit.hit = true;
+     hit.emissive = box.emission > 0.0;
+
+     return true;
+}
+
+bool traceScene(Ray ray, Plane plane, out HitInfo hit, Box box) {
     hit.hit = false;
     hit.t = 1e30;
 
@@ -177,6 +221,12 @@ bool traceScene(Ray ray, Plane plane, out HitInfo hit) {
         if(temp.t < hit.t) {
             hit = temp;
             hit.emission = 0.0;
+        }
+    }
+
+    if(intersectBox(ray, box, temp)) {
+        if(temp.t < hit.t) {
+            hit = temp;
         }
     }
 
@@ -199,6 +249,12 @@ void main() {
     plane.point = vec3(0.0, -1.0, 0.0);
     plane.normal = vec3(0.0, 1.0, 0.0);
 
+    Box box;
+    box.min = vec3(-1.0, -0.5, -6.0);
+    box.max = vec3(1.0, 2.0, -4.0);
+    box.albedo = vec3(1.0, 0.0, 0.0);
+    box.emission = 0.0 ;
+
     Ray ray;
     ray.origin = uCameraPosition;
     ray.direction = rayDir;
@@ -212,7 +268,7 @@ void main() {
     {
         HitInfo hit;
 
-        if (!traceScene(ray, plane, hit)) {
+        if (!traceScene(ray, plane, hit, box)) {
             break;
         }
 
@@ -255,7 +311,7 @@ void main() {
 
             HitInfo lightHit;
 
-            if (traceScene(visibilityRay, plane, lightHit)) {
+            if (traceScene(visibilityRay, plane, lightHit, box)) {
                 if (lightHit.emission > 0.0) {
                     vec3 lightRadiance = lightHit.albedo * lightHit.emission;
                     radiance += throughput * hit.albedo * lightRadiance * NdotL;
