@@ -2,6 +2,7 @@
 out vec4 FragColor;
 
 const int MAX_SPHERES = 10;
+const int MAX_BOXES = 10;
 
 struct Sphere {
     vec4 positionRadius;
@@ -14,6 +15,7 @@ layout(std140) uniform SphereBuffer
 };
 
 uniform int uSphereCount;
+uniform int uBoxCount;
 
 uniform vec2 uResolution;
 uniform int uFrame;
@@ -160,17 +162,16 @@ bool intersectPlane(Ray ray, Plane plane, out HitInfo hit) {
 }
 
 struct Box {
-    vec3 min;
-    vec3 max;
-    vec3 albedo;
-    float emission;
+    vec4 min;
+    vec4 max;
+    vec4 albedoEmission;
 };
 
 bool intersectBox(Ray ray, Box box, out HitInfo hit) { //slab method
      vec3 invDir = 1.0 / ray.direction;
 
-     vec3 t0 = (box.min - ray.origin) * invDir;
-     vec3 t1 = (box.max - ray.origin) * invDir;
+     vec3 t0 = (box.min.xyz - ray.origin) * invDir;
+     vec3 t1 = (box.max.xyz - ray.origin) * invDir;
 
      vec3 tMin = min(t0, t1);
      vec3 tMax = max(t0, t1);
@@ -195,15 +196,20 @@ bool intersectBox(Ray ray, Box box, out HitInfo hit) { //slab method
     else
         hit.normal = ray.direction.z > 0.0 ? vec3(0,0,-1) : vec3(0,0,1);
 
-     hit.albedo = box.albedo;
-     hit.emission = box.emission;
+     hit.albedo = box.albedoEmission.xyz;
+     hit.emission = box.albedoEmission.w;
      hit.hit = true;
-     hit.emissive = box.emission > 0.0;
+     hit.emissive = box.albedoEmission.w > 0.0;
 
      return true;
 }
 
-bool traceScene(Ray ray, Plane plane, out HitInfo hit, Box box) {
+layout(std140) uniform BoxBuffer
+{
+    Box boxes[MAX_BOXES];
+};
+
+bool traceScene(Ray ray, Plane plane, out HitInfo hit) {
     hit.hit = false;
     hit.t = 1e30;
 
@@ -224,9 +230,11 @@ bool traceScene(Ray ray, Plane plane, out HitInfo hit, Box box) {
         }
     }
 
-    if(intersectBox(ray, box, temp)) {
-        if(temp.t < hit.t) {
-            hit = temp;
+    for(int i = 0; i < uBoxCount; i++) {
+        if(intersectBox(ray, boxes[i], temp)) {
+            if(temp.t < hit.t) {
+                hit = temp;
+            }
         }
     }
 
@@ -249,12 +257,6 @@ void main() {
     plane.point = vec3(0.0, -1.0, 0.0);
     plane.normal = vec3(0.0, 1.0, 0.0);
 
-    Box box;
-    box.min = vec3(-1.0, -0.5, -6.0);
-    box.max = vec3(1.0, 2.0, -4.0);
-    box.albedo = vec3(1.0, 0.0, 0.0);
-    box.emission = 0.0 ;
-
     Ray ray;
     ray.origin = uCameraPosition;
     ray.direction = rayDir;
@@ -268,7 +270,7 @@ void main() {
     {
         HitInfo hit;
 
-        if (!traceScene(ray, plane, hit, box)) {
+        if (!traceScene(ray, plane, hit)) {
             break;
         }
 
@@ -311,7 +313,7 @@ void main() {
 
             HitInfo lightHit;
 
-            if (traceScene(visibilityRay, plane, lightHit, box)) {
+            if (traceScene(visibilityRay, plane, lightHit)) {
                 if (lightHit.emission > 0.0) {
                     vec3 lightRadiance = lightHit.albedo * lightHit.emission;
                     radiance += throughput * hit.albedo * lightRadiance * NdotL;

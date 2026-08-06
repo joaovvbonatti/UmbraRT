@@ -9,6 +9,7 @@ Renderer::Renderer()
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &sphereUBO);
+    glGenBuffers(1, &boxUBO);
 }
 
 void Renderer::render(Camera& camera, Scene& scene) {
@@ -35,6 +36,7 @@ void Renderer::render(Camera& camera, Scene& scene) {
     shader.setFloat("uCameraFov", camera.fov);
     shader.setInt("uFrame", frameCount);
     shader.setInt("uSphereCount", scene.getSphereCount());
+    shader.setInt("uBoxCount", scene.getBoxCount());
 
 
     glEnable(GL_BLEND);
@@ -79,6 +81,12 @@ struct gpuSphere {
     glm::vec4 albedoEmission;
 };
 
+struct gpuBox {
+    glm::vec4 min;
+    glm::vec4 max;
+    glm::vec4 albedoEmission;
+};
+
 void Renderer::sendToGPU(Scene &scene) {
     std::vector<gpuSphere> gpuSpheres;
 
@@ -94,6 +102,28 @@ void Renderer::sendToGPU(Scene &scene) {
     glBindBuffer(GL_UNIFORM_BUFFER,sphereUBO);
     glBufferData(GL_UNIFORM_BUFFER, gpuSpheres.size() * sizeof(gpuSphere), gpuSpheres.data(), GL_DYNAMIC_DRAW);
     glBindBufferBase(GL_UNIFORM_BUFFER,0,sphereUBO);
+    glBindBuffer(GL_UNIFORM_BUFFER,0);
+
+    //Boxes --- we do some pre-calculations here to save GPU processing --- 4th element of the vec4s is just padding
+
+    std::vector<gpuBox> gpuBoxes;
+
+    for (Box box : scene.boxes) {
+        gpuBox data;
+
+        glm::vec3 halfSize = box.size * 0.5f;
+
+        data.min = glm::vec4(box.position - halfSize, 0.0f);
+        data.max = glm::vec4(box.position + halfSize, 0.0f);
+
+        data.albedoEmission = glm::vec4(box.albedo, box.emission);
+
+        gpuBoxes.push_back(data);
+    }
+
+    glBindBuffer(GL_UNIFORM_BUFFER,boxUBO);
+    glBufferData(GL_UNIFORM_BUFFER, gpuBoxes.size() * sizeof(gpuBox), gpuBoxes.data(), GL_DYNAMIC_DRAW);
+    glBindBufferBase(GL_UNIFORM_BUFFER,1,boxUBO);
     glBindBuffer(GL_UNIFORM_BUFFER,0);
 }
 

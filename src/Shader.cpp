@@ -59,6 +59,12 @@ Shader::Shader(const std::string& vertex_path, const std::string& fragment_path)
 
     glLinkProgram(id);
 
+    GLuint sphereBlock = glGetUniformBlockIndex(id, "SphereBuffer");
+    GLuint boxBlock    = glGetUniformBlockIndex(id, "BoxBuffer");
+
+    glUniformBlockBinding(id, sphereBlock, 0);
+    glUniformBlockBinding(id, boxBlock, 1);
+
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 }

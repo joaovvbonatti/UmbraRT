@@ -12,3 +12,13 @@ std::vector<Sphere>& Scene::getSpheres() {
 const int Scene::getSphereCount() const {
     return sphereCount;
 }
+
+
+void Scene::addBox(glm::vec3 position, glm::vec3 size, glm::vec3 albedo, float emission) {
+    boxes.push_back(Box(position, size, albedo, emission));
+    boxCount++;
+}
+
+const int Scene::getBoxCount() const {
+    return boxCount;
+}

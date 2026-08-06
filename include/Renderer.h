@@ -26,6 +26,7 @@ private:
 
     void sendToGPU(Scene& scene);
     GLuint sphereUBO;
+    GLuint boxUBO;
 
     GLuint presentFBO = 0;
     GLuint presentTexture = 0;
