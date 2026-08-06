@@ -19,7 +19,6 @@ add_executable(UmbraRT src/main.cpp
         include/Scene.h
         src/Scene.cpp
         include/Sphere.h
-        src/Sphere.cpp
         include/AccumulationBuffer.h
         src/AccumulationBuffer.cpp
         include/Box.h

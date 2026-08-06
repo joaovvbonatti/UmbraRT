@@ -93,8 +93,8 @@ void Renderer::sendToGPU(Scene &scene) {
     for (Sphere& sphere : scene.getSpheres()) {
         gpuSphere data;
 
-        data.positionRadius = glm::vec4(sphere.getPosition(), sphere.getRadius());
-        data.albedoEmission = glm::vec4(sphere.getAlbedo(), sphere.getEmission());
+        data.positionRadius = glm::vec4(sphere.position, sphere.radius);
+        data.albedoEmission = glm::vec4(sphere.albedo, sphere.emission);
 
         gpuSpheres.push_back(data);
     }
