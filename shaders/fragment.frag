@@ -168,26 +168,26 @@ struct Box {
 };
 
 bool intersectBox(Ray ray, Box box, out HitInfo hit) { //slab method
-     vec3 invDir = 1.0 / ray.direction;
+    vec3 invDir = 1.0 / ray.direction;
 
-     vec3 t0 = (box.min.xyz - ray.origin) * invDir;
-     vec3 t1 = (box.max.xyz - ray.origin) * invDir;
+    vec3 t0 = (box.min.xyz - ray.origin) * invDir;
+    vec3 t1 = (box.max.xyz - ray.origin) * invDir;
 
-     vec3 tMin = min(t0, t1);
-     vec3 tMax = max(t0, t1);
+    vec3 tMin = min(t0, t1);
+    vec3 tMax = max(t0, t1);
 
-     float tNear = max(max(tMin.x, tMin.y), tMin.z);
-     float tFar = min(min(tMax.x, tMax.y), tMax.z);
+    float tNear = max(max(tMin.x, tMin.y), tMin.z);
+    float tFar = min(min(tMax.x, tMax.y), tMax.z);
 
-     if(tNear > tFar || tFar < 0.0)
-     return false;
+    if(tNear > tFar || tFar < 0.0)
+    return false;
 
-     float t = tNear > 0.0 ? tNear : tFar;
+    float t = tNear > 0.0 ? tNear : tFar;
 
-     hit.t = t;
-     hit.position = ray.origin + ray.direction * t;
+    hit.t = t;
+    hit.position = ray.origin + ray.direction * t;
 
-     const float eps = 1e-4;
+    const float eps = 1e-4;
 
     if (tNear == tMin.x)
         hit.normal = ray.direction.x > 0.0 ? vec3(-1,0,0) : vec3(1,0,0);
@@ -196,12 +196,64 @@ bool intersectBox(Ray ray, Box box, out HitInfo hit) { //slab method
     else
         hit.normal = ray.direction.z > 0.0 ? vec3(0,0,-1) : vec3(0,0,1);
 
-     hit.albedo = box.albedoEmission.xyz;
-     hit.emission = box.albedoEmission.w;
-     hit.hit = true;
-     hit.emissive = box.albedoEmission.w > 0.0;
+    hit.albedo = box.albedoEmission.xyz;
+    hit.emission = box.albedoEmission.w;
+    hit.hit = true;
+    hit.emissive = box.albedoEmission.w > 0.0;
 
-     return true;
+    return true;
+}
+
+vec3 sampleBox(Box box, inout uint rng)
+{
+    vec3 size = box.max.xyz - box.min.xyz;
+
+    float areaXY = size.x * size.y;
+    float areaXZ = size.x * size.z;
+    float areaYZ = size.y * size.z;
+
+    float totalArea = 2.0 * (areaXY + areaXZ + areaYZ);
+
+    float r = random(rng) * totalArea;
+
+    vec2 uv = vec2(random(rng), random(rng));
+
+    // ±X
+    if (r < 2.0 * areaYZ)
+    {
+        bool positive = r >= areaYZ;
+
+        return vec3(
+        positive ? box.max.x : box.min.x,
+        mix(box.min.y, box.max.y, uv.x),
+        mix(box.min.z, box.max.z, uv.y)
+        );
+    }
+
+    r -= 2.0 * areaYZ;
+
+    // ±Y
+    if (r < 2.0 * areaXZ)
+    {
+        bool positive = r >= areaXZ;
+
+        return vec3(
+        mix(box.min.x, box.max.x, uv.x),
+        positive ? box.max.y : box.min.y,
+        mix(box.min.z, box.max.z, uv.y)
+        );
+    }
+
+    r -= 2.0 * areaXZ;
+
+    // ±Z
+    bool positive = r >= areaXY;
+
+    return vec3(
+    mix(box.min.x, box.max.x, uv.x),
+    mix(box.min.y, box.max.y, uv.y),
+    positive ? box.max.z : box.min.z
+    );
 }
 
 layout(std140) uniform BoxBuffer
@@ -265,11 +317,12 @@ void main() {
 
     vec3 radiance = vec3(0.0);
 
+    HitInfo hit;
 
+
+    //Spheres NEE
     for (int bounce = 0; bounce < 10; bounce++)
     {
-        HitInfo hit;
-
         if (!traceScene(ray, plane, hit)) {
             break;
         }
@@ -326,6 +379,50 @@ void main() {
         ray.origin = hit.position + hit.normal * 0.001;
 
         ray.direction = cosineSampleHemisphere(hit.normal, rng);
+    }
+
+    //Boxes NEE
+    for (int i = 0; i < uBoxCount; i++)
+    {
+        Box light = boxes[i];
+
+        float lightEmission = light.albedoEmission.w;
+
+        if (lightEmission <= 0.0)
+        continue;
+
+        vec3 lightPoint = sampleBox(light, rng);
+
+        vec3 toLight = lightPoint - hit.position;
+
+        float lightDistance = length(toLight);
+
+        vec3 lightDirection = toLight / lightDistance;
+
+        float NdotL = max(dot(hit.normal, lightDirection), 0.0);
+
+        if (NdotL <= 0.0)
+        continue;
+
+        Ray visibilityRay;
+        visibilityRay.origin = hit.position + hit.normal * 0.001;
+        visibilityRay.direction = lightDirection;
+
+        HitInfo lightHit;
+
+        float cosLight = max(dot(-lightDirection, hit.normal), 0.0);
+
+        if(cosLight <= 0.0)
+        continue;
+
+        if (traceScene(visibilityRay, plane, lightHit))
+        {
+            if (lightHit.emission > 0.0 && abs(lightHit.t - lightDistance) < 0.01)
+            {
+                vec3 lightRadiance = lightHit.albedo * lightHit.emission;
+                radiance += throughput * hit.albedo * lightRadiance * NdotL;
+            }
+        }
     }
 
     FragColor = vec4(radiance, 1.0);
