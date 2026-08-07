@@ -36,29 +36,82 @@ void DebugUI::beginFrame() {
 bool DebugUI::drawScenePanel(Scene &scene) {
     bool changed = false;
 
-    std::vector<Sphere>& spheres = scene.spheres;
-
     ImGui::Begin("Scene");
 
-    if (ImGui::Button("Add sphere")) {
-        scene.spheres.emplace_back(glm::vec3(0.0, 1.0, 0.0), glm::vec3(1.0), 1.0, 0.0);
-        changed = true;
+    if (ImGui::Button("Add"))
+        ImGui::OpenPopup("AddObject");
+
+    if (ImGui::BeginPopup("AddObject"))
+    {
+        if (ImGui::MenuItem("Sphere"))
+            scene.spheres.emplace_back(glm::vec3(0, 1, 0), glm::vec3(1.0), 1.0, 0.0);
+
+        if (ImGui::MenuItem("Box"))
+            scene.boxes.emplace_back(glm::vec3(0, 1, 0), glm::vec3(1), glm::vec3(1.0), 0.0);
+
+        ImGui::EndPopup();
     }
 
+    if (ImGui::CollapsingHeader("Spheres"))
+    {
+        for (int i = 0; i < scene.spheres.size(); i++)
+        {
+            bool selected = scene.selectedObject == SelectedObject::Sphere && scene.selectedIndex == i;
 
-    for (int i = 0; i < spheres.size(); i++) {
-        if (ImGui::Selectable(("Sphere " + std::to_string(i)).c_str(), scene.selectedSphere == i))
-            scene.selectedSphere = i;
+            if (ImGui::Selectable(("Sphere " + std::to_string(i)).c_str(), selected))
+            {
+                scene.selectedObject = SelectedObject::Sphere;
+                scene.selectedIndex = i;
+            }
+        }
     }
 
-    if (scene.selectedSphere != -1) {
-        ImGui::Begin("Editor");
-        changed |= ImGui::DragFloat3("Position", glm::value_ptr(spheres[scene.selectedSphere].position), 0.1);
-        changed |= ImGui::DragFloat("Radius", &spheres[scene.selectedSphere].radius, 0.01);
-        changed |= ImGui::ColorPicker3("Albedo", glm::value_ptr(spheres[scene.selectedSphere].albedo));
-        changed |= ImGui::DragFloat("Emission", &spheres[scene.selectedSphere].emission, 0.1);
-        ImGui::End();
+    if (ImGui::CollapsingHeader("Boxes"))
+    {
+        for (int i = 0; i < scene.boxes.size(); i++)
+        {
+            bool selected =
+                scene.selectedObject == SelectedObject::Box && scene.selectedIndex == i;
+
+            if (ImGui::Selectable(("Box " + std::to_string(i)).c_str(), selected))
+            {
+                scene.selectedObject = SelectedObject::Box;
+                scene.selectedIndex = i;
+            }
+        }
     }
+
+    ImGui::Begin("Editor");
+
+    switch (scene.selectedObject)
+    {
+        case SelectedObject::Sphere:
+        {
+            Sphere& sphere = scene.spheres[scene.selectedIndex];
+
+            changed |= ImGui::DragFloat3("Position", glm::value_ptr(sphere.position), 0.1f);
+            changed |= ImGui::DragFloat("Radius", &sphere.radius, 0.01f);
+            changed |= ImGui::ColorPicker3("Albedo", glm::value_ptr(sphere.albedo));
+            changed |= ImGui::DragFloat("Emission", &sphere.emission, 0.1f);
+            break;
+        }
+
+        case SelectedObject::Box:
+        {
+            Box& box = scene.boxes[scene.selectedIndex];
+
+            changed |= ImGui::DragFloat3("Position", glm::value_ptr(box.position), 0.1f);
+            changed |= ImGui::DragFloat3("Size", glm::value_ptr(box.size), 0.1f);
+            changed |= ImGui::ColorPicker3("Albedo", glm::value_ptr(box.albedo));
+            changed |= ImGui::DragFloat("Emission", &box.emission, 0.1f);
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    ImGui::End();
 
     ImGui::End();
 
