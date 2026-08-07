@@ -36,12 +36,12 @@ void DebugUI::beginFrame() {
 bool DebugUI::drawScenePanel(Scene &scene) {
     bool changed = false;
 
-    std::vector<Sphere>& spheres = scene.getSpheres();
+    std::vector<Sphere>& spheres = scene.spheres;
 
     ImGui::Begin("Scene");
 
     if (ImGui::Button("Add sphere")) {
-        scene.addSphere(glm::vec3(0.0, 1.0, 0.0), glm::vec3(1.0), 1.0, 0.0);
+        scene.spheres.emplace_back(glm::vec3(0.0, 1.0, 0.0), glm::vec3(1.0), 1.0, 0.0);
         changed = true;
     }
 

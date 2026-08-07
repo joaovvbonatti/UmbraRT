@@ -35,8 +35,8 @@ void Renderer::render(Camera& camera, Scene& scene) {
     shader.setVec3("uCameraUp", camera.up);
     shader.setFloat("uCameraFov", camera.fov);
     shader.setInt("uFrame", frameCount);
-    shader.setInt("uSphereCount", scene.getSphereCount());
-    shader.setInt("uBoxCount", scene.getBoxCount());
+    shader.setInt("uSphereCount", scene.spheres.size());
+    shader.setInt("uBoxCount", scene.boxes.size());
 
 
     glEnable(GL_BLEND);
@@ -90,7 +90,7 @@ struct gpuBox {
 void Renderer::sendToGPU(Scene &scene) {
     std::vector<gpuSphere> gpuSpheres;
 
-    for (Sphere& sphere : scene.getSpheres()) {
+    for (Sphere& sphere : scene.spheres) {
         gpuSphere data;
 
         data.positionRadius = glm::vec4(sphere.position, sphere.radius);
