@@ -24,6 +24,8 @@ int main() {
 
     Scene scene;
     scene.boxes.emplace_back(glm::vec3(0.0, 1.5, 0.0), glm::vec3(1.0), Material(MATERIAL_DIFFUSE, glm::vec3(1.0), 0.0, 5.0, 0.0));
+    scene.boxes.emplace_back(glm::vec3(3.0, 1.5, 0.0), glm::vec3(1.0), Material(MATERIAL_METAL, glm::vec3(1.0), 0.0, 0.0, 0.0));
+
     scene.spheres.emplace_back(glm::vec3(0.0, 1.0, 3.0), 1.0, Material(MATERIAL_METAL, glm::vec3(1.0), 0.0, 0.0, 0.0));
 
     while (!window.shouldClose()) {

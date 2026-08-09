@@ -367,87 +367,93 @@ void main() {
             break;
         }
 
-        // =========================
-        // Spheres NEE
-        // =========================
+        int materialType = int(hit.materialProperties.x);
 
-        for (int i = 0; i < uSphereCount; i++)
+        if (materialType == MATERIAL_DIFFUSE)
         {
-            Sphere light = spheres[i];
+            // =========================
+            // Spheres NEE
+            // =========================
 
-            float lightEmission = light.albedoEmission.w;
+            for (int i = 0; i < uSphereCount; i++)
+            {
+                Sphere light = spheres[i];
 
-            if (lightEmission <= 0.0)
+                float lightEmission = light.albedoEmission.w;
+
+                if (lightEmission <= 0.0)
                 continue;
 
-            vec3 lightPoint = sampleSphere(light, rng);
 
-            vec3 toLight = lightPoint - hit.position;
+                vec3 lightPoint = sampleSphere(light, rng);
 
-            float lightDistance = length(toLight);
+                vec3 toLight = lightPoint - hit.position;
 
-            vec3 lightDirection = toLight / lightDistance;
+                float lightDistance = length(toLight);
 
-            float NdotL = max(dot(hit.normal, lightDirection), 0.0);
+                vec3 lightDirection = toLight / lightDistance;
 
-            if (NdotL <= 0.0)
+                float NdotL = max(dot(hit.normal, lightDirection), 0.0);
+
+                if (NdotL <= 0.0)
                 continue;
 
-            Ray visibilityRay;
+                Ray visibilityRay;
 
-            visibilityRay.origin = hit.position + hit.normal * 0.001;
+                visibilityRay.origin = hit.position + hit.normal * 0.001;
 
-            visibilityRay.direction = lightDirection;
+                visibilityRay.direction = lightDirection;
 
-            HitInfo lightHit;
+                HitInfo lightHit;
 
-            if (traceScene(visibilityRay, plane, lightHit)) {
-                if (lightHit.emission > 0.0) {
-                    vec3 lightRadiance = lightHit.albedo * lightHit.emission;
+                if (traceScene(visibilityRay, plane, lightHit)) {
+                    if (lightHit.emission > 0.0) {
+                        vec3 lightRadiance = lightHit.albedo * lightHit.emission;
 
-                    radiance += throughput * hit.albedo * lightRadiance * NdotL;
+                        radiance += throughput * hit.albedo * lightRadiance * NdotL;
+                    }
                 }
             }
-        }
 
-        // =========================
-        // Boxes NEE
-        // =========================
+            // =========================
+            // Boxes NEE
+            // =========================
 
-        for (int i = 0; i < uBoxCount; i++) {
-            Box light = boxes[i];
+            for (int i = 0; i < uBoxCount; i++) {
+                Box light = boxes[i];
 
-            float lightEmission = light.albedoEmission.w;
+                float lightEmission = light.albedoEmission.w;
 
-            if (lightEmission <= 0.0)
+                if (lightEmission <= 0.0)
                 continue;
 
-            vec3 lightPoint = sampleBox(light, rng);
+                vec3 lightPoint = sampleBox(light, rng);
 
-            vec3 toLight = lightPoint - hit.position;
+                vec3 toLight = lightPoint - hit.position;
 
-            float lightDistance = length(toLight);
+                float lightDistance = length(toLight);
 
-            vec3 lightDirection = toLight / lightDistance;
+                vec3 lightDirection = toLight / lightDistance;
 
-            float NdotL = max(dot(hit.normal, lightDirection), 0.0);
+                float NdotL = max(dot(hit.normal, lightDirection), 0.0);
 
-            if (NdotL <= 0.0)
+                if (NdotL <= 0.0)
                 continue;
 
-            Ray visibilityRay;
+                Ray visibilityRay;
 
-            visibilityRay.origin = hit.position + hit.normal * EPSILON;
+                visibilityRay.origin = hit.position + hit.normal * EPSILON;
 
-            visibilityRay.direction = lightDirection;
+                visibilityRay.direction = lightDirection;
 
-            HitInfo lightHit;
+                HitInfo lightHit;
 
-            if (traceScene(visibilityRay, plane, lightHit)) {
-                if (lightHit.emission > 0.0) {
-                    vec3 lightRadiance = lightHit.albedo * lightHit.emission;
+                if (traceScene(visibilityRay, plane, lightHit)) {
+                    if (lightHit.emission > 0.0) {
+                        vec3 lightRadiance = lightHit.albedo * lightHit.emission;
 
-                    radiance += throughput * hit.albedo * lightRadiance * NdotL;
+                        radiance += throughput * hit.albedo * lightRadiance * NdotL;
+                    }
                 }
             }
         }
@@ -455,16 +461,6 @@ void main() {
         // =========================
         // Material
         // =========================
-
-        int materialType = int(hit.materialProperties.x);
-
-        if (materialType == MATERIAL_DIFFUSE) {
-            throughput *= hit.albedo;
-
-            ray.origin = hit.position + hit.normal * EPSILON;
-
-            ray.direction = cosineSampleHemisphere(hit.normal, rng);
-        }
 
         else if (materialType == MATERIAL_METAL)
         {
