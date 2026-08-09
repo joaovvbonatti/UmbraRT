@@ -1,10 +1,11 @@
 #pragma once
 #include "glm/vec3.hpp"
+#include "Material.h"
 
 class Sphere {
 public:
     glm::vec3 position;
-    glm::vec3 albedo;
     float radius;
-    float emission;
+
+    Material material;
 };

@@ -76,15 +76,23 @@ void Renderer::render(Camera& camera, Scene& scene) {
     glBindFramebuffer(GL_FRAMEBUFFER,0);
 }
 
+//  Material properties layout:
+//  x = material type
+//  y = roughness
+//  z = IOR
+//  w = padding
+
 struct gpuSphere {
     glm::vec4 positionRadius;
     glm::vec4 albedoEmission;
+    glm::vec4 materialProperties;
 };
 
 struct gpuBox {
     glm::vec4 min;
     glm::vec4 max;
     glm::vec4 albedoEmission;
+    glm::vec4 materialProperties;
 };
 
 void Renderer::sendToGPU(Scene &scene) {
@@ -94,7 +102,8 @@ void Renderer::sendToGPU(Scene &scene) {
         gpuSphere data;
 
         data.positionRadius = glm::vec4(sphere.position, sphere.radius);
-        data.albedoEmission = glm::vec4(sphere.albedo, sphere.emission);
+        data.albedoEmission = glm::vec4(sphere.material.albedo, sphere.material.emission);
+        data.materialProperties = glm::vec4(sphere.material.type, sphere.material.roughness, sphere.material.ior, 0.0f);
 
         gpuSpheres.push_back(data);
     }
@@ -116,7 +125,8 @@ void Renderer::sendToGPU(Scene &scene) {
         data.min = glm::vec4(box.position - halfSize, 0.0f);
         data.max = glm::vec4(box.position + halfSize, 0.0f);
 
-        data.albedoEmission = glm::vec4(box.albedo, box.emission);
+        data.albedoEmission = glm::vec4(box.material.albedo, box.material.emission);
+        data.materialProperties = glm::vec4(box.material.type, box.material.roughness, box.material.ior, 0.0f);
 
         gpuBoxes.push_back(data);
     }

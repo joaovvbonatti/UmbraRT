@@ -22,6 +22,7 @@ add_executable(UmbraRT src/main.cpp
         include/AccumulationBuffer.h
         src/AccumulationBuffer.cpp
         include/Box.h
+        include/Material.h
 )
 
 target_include_directories(UmbraRT PRIVATE
