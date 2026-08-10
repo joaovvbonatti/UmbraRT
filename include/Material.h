@@ -1,16 +1,23 @@
 #pragma once
 #include "glm/vec3.hpp"
 
-enum MaterialType {
-    MATERIAL_DIFFUSE = 0,
-    MATERIAL_METAL,
-    MATERIAL_DIELECTRIC,
-    MATERIAL_EMISSIVE
-};
+
 
 class Material {
 public:
-    int type = MATERIAL_DIFFUSE;
+    enum MaterialType {
+        DIFFUSE = 0,
+        METAL,
+        DIELECTRIC,
+    };
+
+    static constexpr const char* names[] = {
+        "Diffuse",
+        "Metal",
+        "Dielectric"
+    };
+
+    int type = DIFFUSE;
 
     glm::vec3 albedo = glm::vec3(1.0);
 

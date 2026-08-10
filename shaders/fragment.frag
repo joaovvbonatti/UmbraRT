@@ -288,6 +288,17 @@ vec3 sampleBox(Box box, inout uint rng)
     );
 }
 
+vec3 sampleMetal(vec3 direction, vec3 normal, float roughness, inout uint rng) {
+    vec3 reflected = reflect(direction, normal);
+
+    if (roughness <= 0.0)
+        return reflected;
+
+    vec3 randomDirection = cosineSampleHemisphere(reflected, rng);
+
+    return normalize(mix(reflected, randomDirection, roughness));
+}
+
 layout(std140) uniform BoxBuffer
 {
     Box boxes[MAX_BOXES];
@@ -468,7 +479,9 @@ void main() {
 
             ray.origin = hit.position + hit.normal * EPSILON;
 
-            ray.direction = reflect(ray.direction, hit.normal);
+            float roughness = hit.materialProperties.y;
+
+            ray.direction = sampleMetal(ray.direction, hit.normal, roughness, rng);
         }
     }
 

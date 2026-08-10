@@ -44,10 +44,10 @@ bool DebugUI::drawScenePanel(Scene &scene) {
     if (ImGui::BeginPopup("AddObject"))
     {
         if (ImGui::MenuItem("Sphere"))
-            scene.spheres.emplace_back(glm::vec3(0, 1, 0), 1.0, Material(MATERIAL_DIFFUSE, glm::vec3(1.0), 0.0, 0.0, 0.0));
+            scene.spheres.emplace_back(glm::vec3(0, 1, 0), 1.0, Material(Material::DIFFUSE, glm::vec3(1.0), 0.0, 0.0, 0.0));
 
         if (ImGui::MenuItem("Box"))
-            scene.boxes.emplace_back(glm::vec3(0, 1, 0), glm::vec3(1), Material(MATERIAL_DIFFUSE, glm::vec3(1.0), 0.0, 0.0, 0.0));
+            scene.boxes.emplace_back(glm::vec3(0, 1, 0), glm::vec3(1), Material(Material::DIFFUSE, glm::vec3(1.0), 0.0, 0.0, 0.0));
 
         ImGui::EndPopup();
     }
@@ -93,6 +93,18 @@ bool DebugUI::drawScenePanel(Scene &scene) {
             changed |= ImGui::DragFloat("Radius", &sphere.radius, 0.01f);
             changed |= ImGui::ColorPicker3("Albedo", glm::value_ptr(sphere.material.albedo));
             changed |= ImGui::DragFloat("Emission", &sphere.material.emission, 0.1f);
+
+            //Material specific settings
+            int material = static_cast<int>(sphere.material.type);
+
+            if (ImGui::Combo("Material",&material,Material::names,IM_ARRAYSIZE(Material::names))) {
+                sphere.material.type = static_cast<Material::MaterialType>(material);
+                changed = true;
+            }
+
+            if (material == Material::METAL)
+                changed |= ImGui::DragFloat("Roughness", &sphere.material.roughness, 0.01f, 0.0f, 1.0f);
+
             break;
         }
 
@@ -104,6 +116,19 @@ bool DebugUI::drawScenePanel(Scene &scene) {
             changed |= ImGui::DragFloat3("Size", glm::value_ptr(box.size), 0.1f);
             changed |= ImGui::ColorPicker3("Albedo", glm::value_ptr(box.material.albedo));
             changed |= ImGui::DragFloat("Emission", &box.material.emission, 0.1f);
+
+            //Material specific settings
+            //Material specific settings
+            int material = static_cast<int>(box.material.type);
+
+            if (ImGui::Combo("Material",&material,Material::names,IM_ARRAYSIZE(Material::names))) {
+                box.material.type = static_cast<Material::MaterialType>(material);
+                changed = true;
+            }
+
+            if (material == Material::METAL)
+                changed |= ImGui::DragFloat("Roughness", &box.material.roughness, 0.01f, 0.0f, 1.0f);
+
             break;
         }
 
