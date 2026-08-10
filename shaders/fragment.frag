@@ -336,6 +336,19 @@ bool traceScene(Ray ray, Plane plane, out HitInfo hit) {
     return hit.hit;
 }
 
+const vec3 SKY_COLOR = vec3(0.5, 0.7, 1.0);
+const float SKY_INTENSITY = 1.0;
+
+vec3 skyColor(vec3 direction)
+{
+    float t = 0.5 * (direction.y + 1.0);
+
+    vec3 bottom = vec3(0.15);
+    vec3 top = SKY_COLOR;
+
+    return mix(bottom, top, t) * SKY_INTENSITY;
+}
+
 void main() {
     uint rng = uint(gl_FragCoord.x) + uint(gl_FragCoord.y)*4096u + uint(uFrame)*16777619u;
 
@@ -366,6 +379,7 @@ void main() {
     for (int bounce = 0; bounce < 10; bounce++)
     {
         if (!traceScene(ray, plane, hit)) {
+            radiance += throughput * skyColor(ray.direction);
             break;
         }
 
@@ -467,6 +481,12 @@ void main() {
                     }
                 }
             }
+
+            throughput *= hit.albedo;
+
+            ray.origin = hit.position + hit.normal * EPSILON;
+
+            ray.direction = cosineSampleHemisphere(hit.normal, rng);
         }
 
         // =========================
