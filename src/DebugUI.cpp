@@ -91,7 +91,7 @@ bool DebugUI::drawScenePanel(Scene &scene) {
 
             changed |= ImGui::DragFloat3("Position", glm::value_ptr(sphere.position), 0.1f);
             changed |= ImGui::DragFloat("Radius", &sphere.radius, 0.01f);
-            changed |= ImGui::ColorPicker3("Albedo", glm::value_ptr(sphere.material.albedo));
+            changed |= ImGui::ColorEdit3("Albedo", glm::value_ptr(sphere.material.albedo));
             changed |= ImGui::DragFloat("Emission", &sphere.material.emission, 0.1f);
 
             //Material specific settings
@@ -114,7 +114,7 @@ bool DebugUI::drawScenePanel(Scene &scene) {
 
             changed |= ImGui::DragFloat3("Position", glm::value_ptr(box.position), 0.1f);
             changed |= ImGui::DragFloat3("Size", glm::value_ptr(box.size), 0.1f);
-            changed |= ImGui::ColorPicker3("Albedo", glm::value_ptr(box.material.albedo));
+            changed |= ImGui::ColorEdit3("Albedo", glm::value_ptr(box.material.albedo));
             changed |= ImGui::DragFloat("Emission", &box.material.emission, 0.1f);
 
             //Material specific settings
