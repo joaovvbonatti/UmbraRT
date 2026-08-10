@@ -37,6 +37,9 @@ void Renderer::render(Camera& camera, Scene& scene) {
     shader.setInt("uFrame", frameCount);
     shader.setInt("uSphereCount", scene.spheres.size());
     shader.setInt("uBoxCount", scene.boxes.size());
+    shader.setVec3("uSkyColor", scene.skyColor);
+    shader.setVec3("uSkyHorizon", scene.skyHorizon);
+    shader.setFloat("uSkyIntensity", scene.skyIntensity);
 
 
     glEnable(GL_BLEND);
@@ -232,7 +235,6 @@ void Renderer::createPresentBuffer(int width, int height) {
     presentWidth = width;
     presentHeight = height;
 }
-
 
 Renderer::~Renderer() {
     glDeleteProgram(shader.id);

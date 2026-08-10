@@ -43,6 +43,7 @@ int main() {
         changed |= ui.drawCameraPanel(camera);
         changed |= ui.drawScenePanel(scene);
         changed |= ui.drawRenderPanel(renderer);
+        changed |= ui.drawSkyPanel(scene);
         ui.drawViewport(renderer);
         ui.endFrame();
 

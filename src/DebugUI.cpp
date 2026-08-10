@@ -186,6 +186,20 @@ void DebugUI::drawViewport(Renderer& renderer) {
 
 }
 
+bool DebugUI::drawSkyPanel(Scene& scene) {
+    bool changed = false;
+
+    ImGui::Begin("Sky");
+
+    changed |= ImGui::ColorEdit3("Sky color", glm::value_ptr(scene.skyColor));
+    changed |= ImGui::ColorEdit3("Horizon color", glm::value_ptr(scene.skyHorizon));
+    changed |= ImGui::DragFloat("Sky intensity", &scene.skyIntensity, 0.01);
+
+    ImGui::End();
+
+    return changed;
+}
+
 void DebugUI::endFrame() {
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

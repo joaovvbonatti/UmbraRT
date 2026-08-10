@@ -34,6 +34,10 @@ uniform vec3 uCameraRight;
 uniform vec3 uCameraUp;
 uniform float uCameraFov;
 
+uniform vec3 uSkyColor;
+uniform vec3 uSkyHorizon;
+uniform float uSkyIntensity;
+
 uint pcg_hash(uint num)
 {
     uint state = num * 747796405u + 2891336453u;
@@ -336,17 +340,18 @@ bool traceScene(Ray ray, Plane plane, out HitInfo hit) {
     return hit.hit;
 }
 
-const vec3 SKY_COLOR = vec3(0.5, 0.7, 1.0);
-const float SKY_INTENSITY = 1.0;
-
 vec3 skyColor(vec3 direction)
 {
-    float t = 0.5 * (direction.y + 1.0);
+    float height = max(direction.y, 0.0);
 
-    vec3 bottom = vec3(0.15);
-    vec3 top = SKY_COLOR;
+    float t = pow(height, 0.5);
 
-    return mix(bottom, top, t) * SKY_INTENSITY;
+    vec3 horizon = uSkyHorizon;
+    vec3 zenith  = uSkyColor;
+
+    vec3 color = mix(horizon, zenith, t);
+
+    return color * uSkyIntensity;
 }
 
 void main() {

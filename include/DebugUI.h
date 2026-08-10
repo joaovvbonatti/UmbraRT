@@ -17,4 +17,5 @@ public:
     bool drawCameraPanel(Camera& camera);
     bool drawRenderPanel(Renderer& renderer);
     void drawViewport(Renderer& renderer);
+    bool drawSkyPanel(Scene& scene);
 };
