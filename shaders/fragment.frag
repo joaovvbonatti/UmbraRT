@@ -3,8 +3,8 @@ out vec4 FragColor;
 
 const float EPSILON = 0.1;
 
-const int MAX_SPHERES = 10;
-const int MAX_BOXES = 10;
+const int MAX_SPHERES = 100;
+const int MAX_BOXES = 100;
 
 const int MATERIAL_DIFFUSE = 0;
 const int MATERIAL_METAL = 1;

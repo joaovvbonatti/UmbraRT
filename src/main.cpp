@@ -22,11 +22,7 @@ int main() {
 
     Renderer renderer;
 
-    Scene scene;
-    scene.boxes.emplace_back(glm::vec3(0.0, 1.5, 0.0), glm::vec3(1.0), Material(Material::DIFFUSE, glm::vec3(1.0), 0.0, 1.0, 0.0));
-    scene.boxes.emplace_back(glm::vec3(3.0, 1.5, 0.0), glm::vec3(1.0), Material(Material::METAL, glm::vec3(1.0), 0.0, 0.0, 0.0));
-
-    scene.spheres.emplace_back(glm::vec3(0.0, 1.0, 3.0), 1.0, Material(Material::METAL, glm::vec3(1.0), 0.0, 0.0, 0.0));
+    Scene scene = randomScene(999);
 
     while (!window.shouldClose()) {
         float currentFrame = glfwGetTime();
