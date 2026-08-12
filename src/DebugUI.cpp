@@ -90,9 +90,9 @@ bool DebugUI::drawScenePanel(Scene &scene) {
             Sphere& sphere = scene.spheres[scene.selectedIndex];
 
             changed |= ImGui::DragFloat3("Position", glm::value_ptr(sphere.position), 0.1f);
-            changed |= ImGui::DragFloat("Radius", &sphere.radius, 0.01f);
+            changed |= ImGui::DragFloat("Radius", &sphere.radius, 0.01f, 0.0f, FLT_MAX);
             changed |= ImGui::ColorEdit3("Albedo", glm::value_ptr(sphere.material.albedo));
-            changed |= ImGui::DragFloat("Emission", &sphere.material.emission, 0.1f);
+            changed |= ImGui::DragFloat("Emission", &sphere.material.emission, 0.1f, 0.0f, FLT_MAX);
 
             //Material specific settings
             int material = static_cast<int>(sphere.material.type);
@@ -103,7 +103,7 @@ bool DebugUI::drawScenePanel(Scene &scene) {
             }
 
             if (material == Material::METAL)
-                changed |= ImGui::DragFloat("Roughness", &sphere.material.roughness, 0.01f, 0.0f, 1.0f);
+                changed |= ImGui::DragFloat("Roughness", &sphere.material.roughness, 0.01f, 0.0f, FLT_MAX);
 
             break;
         }
@@ -113,11 +113,10 @@ bool DebugUI::drawScenePanel(Scene &scene) {
             Box& box = scene.boxes[scene.selectedIndex];
 
             changed |= ImGui::DragFloat3("Position", glm::value_ptr(box.position), 0.1f);
-            changed |= ImGui::DragFloat3("Size", glm::value_ptr(box.size), 0.1f);
+            changed |= ImGui::DragFloat3("Size", glm::value_ptr(box.size), 0.1f, 0.0f, FLT_MAX);
             changed |= ImGui::ColorEdit3("Albedo", glm::value_ptr(box.material.albedo));
-            changed |= ImGui::DragFloat("Emission", &box.material.emission, 0.1f);
+            changed |= ImGui::DragFloat("Emission", &box.material.emission, 0.1f, 0.0f, FLT_MAX);
 
-            //Material specific settings
             //Material specific settings
             int material = static_cast<int>(box.material.type);
 
