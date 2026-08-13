@@ -1,5 +1,7 @@
 #include "Renderer.h"
 
+#include <iostream>
+
 #include "glad/gl.h"
 
 Renderer::Renderer()
@@ -10,6 +12,7 @@ Renderer::Renderer()
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &sphereUBO);
     glGenBuffers(1, &boxUBO);
+    glGenBuffers(1, &planeUBO);
 }
 
 void Renderer::render(Camera& camera, Scene& scene) {
@@ -40,6 +43,7 @@ void Renderer::render(Camera& camera, Scene& scene) {
     shader.setVec3("uSkyColor", scene.skyColor);
     shader.setVec3("uSkyHorizon", scene.skyHorizon);
     shader.setFloat("uSkyIntensity", scene.skyIntensity);
+    shader.setInt("uPlaneCount", scene.planes.size());
 
 
     glEnable(GL_BLEND);
@@ -98,6 +102,13 @@ struct gpuBox {
     glm::vec4 materialProperties;
 };
 
+struct gpuPlane {
+    glm::vec4 point;
+    glm::vec4 normal;
+    glm::vec4 albedoEmission;
+    glm::vec4 materialProperties;
+};
+
 void Renderer::sendToGPU(Scene &scene) {
     std::vector<gpuSphere> gpuSpheres;
 
@@ -137,6 +148,27 @@ void Renderer::sendToGPU(Scene &scene) {
     glBindBuffer(GL_UNIFORM_BUFFER,boxUBO);
     glBufferData(GL_UNIFORM_BUFFER, gpuBoxes.size() * sizeof(gpuBox), gpuBoxes.data(), GL_DYNAMIC_DRAW);
     glBindBufferBase(GL_UNIFORM_BUFFER,1,boxUBO);
+    glBindBuffer(GL_UNIFORM_BUFFER,0);
+
+    //Planes
+
+    std::vector<gpuPlane> gpuPlanes;
+
+    for (Plane plane : scene.planes) {
+        gpuPlane data;
+
+        data.point = glm::vec4(plane.point, 0.0f);
+        data.normal = glm::vec4(plane.normal, 0.0f);
+
+        data.albedoEmission = glm::vec4(plane.material.albedo, plane.material.emission);
+        data.materialProperties = glm::vec4(plane.material.type, plane.material.roughness, plane.material.ior, 0.0f);
+
+        gpuPlanes.push_back(data);
+    }
+
+    glBindBuffer(GL_UNIFORM_BUFFER,planeUBO);
+    glBufferData(GL_UNIFORM_BUFFER, gpuPlanes.size() * sizeof(gpuPlane), gpuPlanes.data(), GL_DYNAMIC_DRAW);
+    glBindBufferBase(GL_UNIFORM_BUFFER,2,planeUBO);
     glBindBuffer(GL_UNIFORM_BUFFER,0);
 }
 
@@ -240,4 +272,6 @@ Renderer::~Renderer() {
     glDeleteProgram(shader.id);
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &sphereUBO);
+    glDeleteBuffers(1, &boxUBO);
+    glDeleteBuffers(1, &planeUBO);
 }

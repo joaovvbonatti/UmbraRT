@@ -1,7 +1,5 @@
 #include <GLFW/glfw3.h>
 
-#include "glm/glm.hpp"
-
 #include "Camera.h"
 #include "DebugUI.h"
 #include "Input.h"
@@ -23,6 +21,7 @@ int main() {
     Renderer renderer;
 
     Scene scene = randomScene(999);
+    scene.planes.emplace_back(glm::vec3(0.0), glm::vec3(0.0, 1.0, 0.0), Material(Material::DIFFUSE, glm::vec3(0.1), 0.0, 0.0, 0.0));
 
     while (!window.shouldClose()) {
         float currentFrame = glfwGetTime();

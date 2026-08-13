@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "Box.h"
+#include "Plane.h"
 #include "Sphere.h"
 
 enum class SelectedObject {
@@ -14,6 +15,7 @@ class Scene {
 public:
     std::vector<Sphere> spheres;
     std::vector<Box> boxes;
+    std::vector<Plane> planes;
 
     SelectedObject selectedObject = SelectedObject::None;
     int selectedIndex = -1;

@@ -1,10 +1,11 @@
 #version 330 core
 out vec4 FragColor;
 
-const float EPSILON = 0.1;
+const float EPSILON = 0.001;
 
 const int MAX_SPHERES = 100;
 const int MAX_BOXES = 100;
+const int MAX_PLANES = 10;
 
 const int MATERIAL_DIFFUSE = 0;
 const int MATERIAL_METAL = 1;
@@ -24,6 +25,7 @@ layout(std140) uniform SphereBuffer
 
 uniform int uSphereCount;
 uniform int uBoxCount;
+uniform int uPlaneCount;
 
 uniform vec2 uResolution;
 uniform int uFrame;
@@ -87,8 +89,10 @@ struct Ray{
 };
 
 struct Plane{
-    vec3 point;
-    vec3 normal;
+    vec4 point;
+    vec4 normal;
+    vec4 albedoEmission;
+    vec4 materialProperties;
 };
 
 struct HitInfo
@@ -158,12 +162,12 @@ bool intersectSphere(Ray ray, Sphere sphere, out HitInfo hit) {
 }
 
 bool intersectPlane(Ray ray, Plane plane, out HitInfo hit) {
-    float denom = dot(ray.direction, plane.normal);
+    float denom = dot(ray.direction, plane.normal.xyz);
 
     if(abs(denom) < 0.0001)
             return false;
 
-    float t = dot(plane.point - ray.origin, plane.normal) / denom;
+    float t = dot(plane.point.xyz - ray.origin, plane.normal.xyz) / denom;
 
     if(t < 0.001)
             return false;
@@ -171,7 +175,7 @@ bool intersectPlane(Ray ray, Plane plane, out HitInfo hit) {
     hit.hit = true;
     hit.t = t;
     hit.position = ray.origin + ray.direction * t;
-    hit.normal = normalize(plane.normal);
+    hit.normal = normalize(plane.normal.xyz);
 
     float tileSize = 1.0;
 
@@ -190,6 +194,11 @@ struct Box {
     vec4 max;
     vec4 albedoEmission;
     vec4 materialProperties;
+};
+
+layout(std140) uniform PlaneBuffer
+{
+    Plane planes[MAX_PLANES];
 };
 
 bool intersectBox(Ray ray, Box box, out HitInfo hit) { //slab method
@@ -308,7 +317,7 @@ layout(std140) uniform BoxBuffer
     Box boxes[MAX_BOXES];
 };
 
-bool traceScene(Ray ray, Plane plane, out HitInfo hit) {
+bool traceScene(Ray ray, out HitInfo hit) {
     hit.hit = false;
     hit.t = 1e30;
 
@@ -322,10 +331,11 @@ bool traceScene(Ray ray, Plane plane, out HitInfo hit) {
         }
     }
 
-    if(intersectPlane(ray, plane, temp)) {
-        if(temp.t < hit.t) {
-            hit = temp;
-            hit.emission = 0.0;
+    for(int i = 0; i < uPlaneCount; i++) {
+        if(intersectPlane(ray, planes[i], temp)) {
+            if(temp.t < hit.t) {
+                hit = temp;
+            }
         }
     }
 
@@ -366,10 +376,6 @@ void main() {
     float scale = tan(radians(uCameraFov * 0.5));
     vec3 rayDir = normalize(uCameraForward + uv.x * scale * uCameraRight + uv.y * scale * uCameraUp);
 
-    Plane plane;
-    plane.point = vec3(0.0, -1.0, 0.0);
-    plane.normal = vec3(0.0, 1.0, 0.0);
-
     Ray ray;
     ray.origin = uCameraPosition;
     ray.direction = rayDir;
@@ -383,7 +389,7 @@ void main() {
 
     for (int bounce = 0; bounce < 10; bounce++)
     {
-        if (!traceScene(ray, plane, hit)) {
+        if (!traceScene(ray, hit)) {
             radiance += throughput * skyColor(ray.direction);
             break;
         }
@@ -436,7 +442,7 @@ void main() {
 
                 HitInfo lightHit;
 
-                if (traceScene(visibilityRay, plane, lightHit)) {
+                if (traceScene(visibilityRay, lightHit)) {
                     if (lightHit.emission > 0.0) {
                         vec3 lightRadiance = lightHit.albedo * lightHit.emission;
 
@@ -478,7 +484,7 @@ void main() {
 
                 HitInfo lightHit;
 
-                if (traceScene(visibilityRay, plane, lightHit)) {
+                if (traceScene(visibilityRay, lightHit)) {
                     if (lightHit.emission > 0.0) {
                         vec3 lightRadiance = lightHit.albedo * lightHit.emission;
 
