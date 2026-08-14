@@ -177,13 +177,9 @@ bool intersectPlane(Ray ray, Plane plane, out HitInfo hit) {
     hit.position = ray.origin + ray.direction * t;
     hit.normal = normalize(plane.normal.xyz);
 
-    float tileSize = 1.0;
-
-    float checker = mod(floor(hit.position.x / tileSize) + floor(hit.position.z / tileSize), 2.0);
-
-    hit.albedo = mix(vec3(0.20), vec3(0.15), checker);
-    hit.emission = 0.0;
-    hit.materialProperties = vec4(MATERIAL_DIFFUSE, 0.0, 1.5, 0.0);
+    hit.albedo = plane.albedoEmission.xyz;
+    hit.emission = plane.albedoEmission.w;
+    hit.materialProperties = plane.materialProperties;
     hit.emissive = false;
 
     return true;

@@ -27,3 +27,4 @@ public:
 };
 
 Scene randomScene(int seed);
+Scene cornell();

@@ -88,3 +88,32 @@ Scene randomScene(int seed) {
 
     return scene;
 }
+
+Scene cornell() {
+    Scene scene;
+
+    Box light = Box(glm::vec3(0.0, 10.0, 0.0), glm::vec3(1.0, 0.01, 1.0), Material(Material::DIFFUSE, glm::vec3(1.0), 0.0, 1.0, 0.0));
+    scene.boxes.push_back(light);
+
+    Plane floor = Plane(glm::vec3(0.0), glm::vec3(0.0, 1.0, 0.0), Material(Material::DIFFUSE, glm::vec3(1.0), 0.0, 0.0, 0.0));
+    scene.planes.push_back(floor);
+    Plane ceiling = Plane(glm::vec3(0.0, 10.0, 0.0), glm::vec3(0.0, -1.0, 0.0), Material(Material::DIFFUSE, glm::vec3(1.0), 0.0, 0.0, 0.0));
+    scene.planes.push_back(ceiling);
+    Plane back = Plane(glm::vec3(10.0, 1.0, 0.0), glm::vec3(-1.0, 0.0, 0.0), Material(Material::DIFFUSE, glm::vec3(1.0), 0.0, 0.0, 0.0));
+    scene.planes.push_back(back);
+    Plane left = Plane(glm::vec3(0.0, 1.0, -5.0), glm::vec3(0.0, 0.0, 1.0), Material(Material::DIFFUSE, glm::vec3(1.0, 0.0, 0.0), 0.0, 0.0, 0.0));
+    scene.planes.push_back(left);
+    Plane right = Plane(glm::vec3(0.0, 1.0, 5.0), glm::vec3(0.0, 0.0, -1.0), Material(Material::DIFFUSE, glm::vec3(0.0, 1.0, 0.0), 0.0, 0.0, 0.0));
+    scene.planes.push_back(right);
+    Plane front = Plane(glm::vec3(-20.0, 0.0, 0.0), glm::vec3(1.0, 0.0, 0.0), Material(Material::DIFFUSE, glm::vec3(0.0), 0.0, 0.0, 0.0));
+    scene.planes.push_back(front);
+
+    Sphere metal = Sphere(glm::vec3(3.0, 2.0, 2.0), 2.0, Material(Material::METAL, glm::vec3(1.0), 0.1, 0.0, 0.0));
+    scene.spheres.push_back(metal);
+    Sphere diffuse = Sphere(glm::vec3(2.0, 1.0, -2.0), 1.0, Material(Material::DIFFUSE, glm::vec3(1.0, 1.0, 0.0), 0.0, 0.0, 0.0));
+    scene.spheres.push_back(diffuse);
+    Box box = Box(glm::vec3(6.0, 3.0, -2.0), glm::vec3(3.0, 7.0, 3.0), Material(Material::DIFFUSE, glm::vec3(0.0, 0.0, 1.0), 0.0, 0.0, 0.0));
+    scene.boxes.push_back(box);
+
+    return scene;
+}

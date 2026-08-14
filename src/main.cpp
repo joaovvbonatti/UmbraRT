@@ -11,6 +11,8 @@ int main() {
     Window window(1600, 900);
 
     Camera camera;
+    camera.position = glm::vec3(-5.0, 5.0, 0.0);
+    camera.yaw = 0.0f;
 
     Input input(window.getHandle(), camera);
 
@@ -20,8 +22,9 @@ int main() {
 
     Renderer renderer;
 
-    Scene scene = randomScene(999);
-    scene.planes.emplace_back(glm::vec3(0.0), glm::vec3(0.0, 1.0, 0.0), Material(Material::DIFFUSE, glm::vec3(0.1), 0.0, 0.0, 0.0));
+    Scene scene = cornell();
+    //Scene scene = randomScene(999);
+    //scene.planes.emplace_back(glm::vec3(0.0), glm::vec3(0.0, 1.0, 0.0), Material(Material::DIFFUSE, glm::vec3(0.1), 0.0, 0.0, 0.0));
 
     while (!window.shouldClose()) {
         float currentFrame = glfwGetTime();
