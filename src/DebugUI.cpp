@@ -43,11 +43,15 @@ bool DebugUI::drawScenePanel(Scene &scene) {
 
     if (ImGui::BeginPopup("AddObject"))
     {
-        if (ImGui::MenuItem("Sphere"))
+        if (ImGui::MenuItem("Sphere")) {
             scene.spheres.emplace_back(glm::vec3(0, 1, 0), 1.0, Material(Material::DIFFUSE, glm::vec3(1.0), 0.0, 0.0, 0.0));
+            changed = true;
+        }
 
-        if (ImGui::MenuItem("Box"))
+        if (ImGui::MenuItem("Box")) {
             scene.boxes.emplace_back(glm::vec3(0, 1, 0), glm::vec3(1), Material(Material::DIFFUSE, glm::vec3(1.0), 0.0, 0.0, 0.0));
+            changed = true;
+        }
 
         ImGui::EndPopup();
     }

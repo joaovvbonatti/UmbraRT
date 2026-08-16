@@ -187,6 +187,7 @@ void Renderer::setViewportSize(int width, int height) {
 
 void Renderer::resetAccumulation() {
     accumulation.reset();
+    frameCount = 0;
 }
 
 void Renderer::createPresentBuffer(int width, int height) {
@@ -270,8 +271,13 @@ void Renderer::createPresentBuffer(int width, int height) {
 
 Renderer::~Renderer() {
     glDeleteProgram(shader.id);
+    glDeleteProgram(presentShader.id);
+
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &sphereUBO);
     glDeleteBuffers(1, &boxUBO);
     glDeleteBuffers(1, &planeUBO);
+
+    glDeleteFramebuffers(1, &presentFBO);
+    glDeleteTextures(1, &presentTexture);
 }

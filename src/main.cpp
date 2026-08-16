@@ -11,7 +11,7 @@ int main() {
     Window window(1600, 900);
 
     Camera camera;
-    camera.position = glm::vec3(-5.0, 5.0, 0.0);
+    camera.position = glm::vec3(-10.0, 5.0, 0.0);
     camera.yaw = 0.0f;
 
     Input input(window.getHandle(), camera);
