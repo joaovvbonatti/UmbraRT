@@ -30,6 +30,8 @@ add_executable(UmbraRT src/main.cpp
         src/Model/ModelLoader.h
         src/Model/ModelLoader.cpp
         src/Model/Triangle.h
+        include/TriangleBuffer.h
+        src/TriangleBuffer.cpp
 )
 
 target_include_directories(UmbraRT PRIVATE
