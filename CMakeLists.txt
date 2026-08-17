@@ -24,6 +24,11 @@ add_executable(UmbraRT src/main.cpp
         include/Box.h
         include/Material.h
         include/Plane.h
+        src/Model/Vertex.h
+        src/Model/Mesh.h
+        src/Model/Model.h
+        src/Model/ModelLoader.h
+        src/Model/ModelLoader.cpp
 )
 
 target_include_directories(UmbraRT PRIVATE
