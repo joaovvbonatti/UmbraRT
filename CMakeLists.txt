@@ -31,6 +31,7 @@ target_include_directories(UmbraRT PRIVATE
         external/glm
         external/imgui
         external/imgui/backends
+        external/tinyobjloader
 )
 
 target_compile_definitions(UmbraRT PRIVATE GLFW_INCLUDE_NONE)
