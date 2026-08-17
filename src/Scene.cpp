@@ -1,7 +1,6 @@
 #include "Scene.h"
 #include <random>
 
-#include "glm/detail/func_geometric.inl"
 
 Scene randomScene(int seed) {
     Scene scene;
@@ -116,4 +115,41 @@ Scene cornell() {
     scene.boxes.push_back(box);
 
     return scene;
+}
+
+void Scene::buildTriangles() {
+    triangles.clear();
+
+    for (const Model& model : models) {
+        for (const Mesh& mesh : model.meshes) {
+            for (size_t i = 0; i < mesh.indices.size(); i += 3) {
+
+                uint32_t i0 = mesh.indices[i + 0];
+                uint32_t i1 = mesh.indices[i + 1];
+                uint32_t i2 = mesh.indices[i + 2];
+
+                Triangle triangle;
+
+                glm::vec3 p0 = mesh.vertices[i0].position;
+                glm::vec3 p1 = mesh.vertices[i1].position;
+                glm::vec3 p2 = mesh.vertices[i2].position;
+
+                glm::vec3 n0 = mesh.vertices[i0].normal;
+                glm::vec3 n1 = mesh.vertices[i1].normal;
+                glm::vec3 n2 = mesh.vertices[i2].normal;
+
+                triangle.v0 = glm::vec3(model.transform * glm::vec4(p0, 1.0f));
+                triangle.v1 = glm::vec3(model.transform * glm::vec4(p1, 1.0f));
+                triangle.v2 = glm::vec3(model.transform * glm::vec4(p2, 1.0f));
+
+                glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model.transform)));
+
+                triangle.n0 = glm::normalize(normalMatrix * n0);
+                triangle.n1 = glm::normalize(normalMatrix * n1);
+                triangle.n2 = glm::normalize(normalMatrix * n2);
+
+                triangles.push_back(triangle);
+            }
+        }
+    }
 }

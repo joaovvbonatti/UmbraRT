@@ -29,6 +29,7 @@ add_executable(UmbraRT src/main.cpp
         src/Model/Model.h
         src/Model/ModelLoader.h
         src/Model/ModelLoader.cpp
+        src/Model/Triangle.h
 )
 
 target_include_directories(UmbraRT PRIVATE
@@ -50,6 +51,7 @@ add_library(glad
 target_include_directories(glad PUBLIC
         external/glad/include
         include
+        src
 )
 
 target_link_libraries(UmbraRT
@@ -63,14 +65,15 @@ target_link_libraries(UmbraRT
         OpenGL::GL
 )
 
-add_custom_target(copy_shaders ALL
+add_custom_command(TARGET UmbraRT POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/shaders
-        ${CMAKE_BINARY_DIR}/shaders
-        COMMENT "Copying shaders to build directory"
-)
+        $<TARGET_FILE_DIR:UmbraRT>/shaders
 
-add_dependencies(UmbraRT copy_shaders)
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/assets
+        $<TARGET_FILE_DIR:UmbraRT>/assets
+)
 
 target_sources(UmbraRT PRIVATE
 

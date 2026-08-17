@@ -4,6 +4,9 @@
 #include "Box.h"
 #include "Plane.h"
 #include "Sphere.h"
+#include "Model/Model.h"
+#include "Model/Triangle.h"
+
 
 enum class SelectedObject {
     None,
@@ -16,6 +19,8 @@ public:
     std::vector<Sphere> spheres;
     std::vector<Box> boxes;
     std::vector<Plane> planes;
+    std::vector<Model> models;
+    std::vector<Triangle> triangles;
 
     SelectedObject selectedObject = SelectedObject::None;
     int selectedIndex = -1;
@@ -24,6 +29,7 @@ public:
     float skyIntensity = 1.0;
     glm::vec3 skyHorizon = glm::vec3(0.75, 0.85, 1.0);
 
+    void buildTriangles();
 };
 
 Scene randomScene(int seed);

@@ -1,3 +1,4 @@
+#include <iostream>
 #include <GLFW/glfw3.h>
 
 #include "Camera.h"
@@ -6,6 +7,8 @@
 #include "Renderer.h"
 #include "Window.h"
 #include "Scene.h"
+#include "glm/ext/matrix_transform.hpp"
+#include "Model/ModelLoader.h"
 
 int main() {
     Window window(1600, 900);
@@ -23,8 +26,15 @@ int main() {
     Renderer renderer;
 
     Scene scene = cornell();
+
     //Scene scene = randomScene(999);
     //scene.planes.emplace_back(glm::vec3(0.0), glm::vec3(0.0, 1.0, 0.0), Material(Material::DIFFUSE, glm::vec3(0.1), 0.0, 0.0, 0.0));
+
+    Model cube = ModelLoader::load("assets/cube.obj");
+    cube.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
+    scene.models.push_back(std::move(cube));
+    scene.buildTriangles();
+    std::cout << "Triangles: " << scene.triangles.size() << std::endl;
 
     while (!window.shouldClose()) {
         float currentFrame = glfwGetTime();
