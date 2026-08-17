@@ -36,6 +36,7 @@ add_executable(UmbraRT src/main.cpp
 
 target_include_directories(UmbraRT PRIVATE
         include
+        src
         external/glm
         external/imgui
         external/imgui/backends
@@ -52,8 +53,6 @@ add_library(glad
 
 target_include_directories(glad PUBLIC
         external/glad/include
-        include
-        src
 )
 
 target_link_libraries(UmbraRT

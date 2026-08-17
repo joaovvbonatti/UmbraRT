@@ -12,6 +12,21 @@ const int MATERIAL_METAL = 1;
 const int MATERIAL_DIELECTRIC = 2;
 const int MATERIAL_EMISSIVE = 3;
 
+struct Triangle {
+    vec4 v0;
+    vec4 v1;
+    vec4 v2;
+
+    vec4 n0;
+    vec4 n1;
+    vec4 n2;
+};
+
+layout(std140) uniform TriangleBuffer
+{
+    Triangle triangles[262144];
+};
+
 struct Sphere {
     vec4 positionRadius;
     vec4 albedoEmission;
@@ -26,6 +41,7 @@ layout(std140) uniform SphereBuffer
 uniform int uSphereCount;
 uniform int uBoxCount;
 uniform int uPlaneCount;
+uniform int uTriangleCount;
 
 uniform vec2 uResolution;
 uniform int uFrame;
@@ -185,6 +201,65 @@ bool intersectPlane(Ray ray, Plane plane, out HitInfo hit) {
     return true;
 }
 
+bool intersectTriangle(Ray ray, Triangle triangle, out HitInfo hit) { //Möller-Trumbore
+    vec3 v0 = triangle.v0.xyz;
+    vec3 v1 = triangle.v1.xyz;
+    vec3 v2 = triangle.v2.xyz;
+
+    vec3 edge1 = v1 - v0;
+    vec3 edge2 = v2 - v0;
+
+    vec3 h = cross(ray.direction, edge2);
+    float a = dot(edge1, h);
+
+    // Ray parallel
+    if (abs(a) < EPSILON)
+        return false;
+
+    float f = 1.0 / a;
+
+    vec3 s = ray.origin - v0;
+
+    float u = f * dot(s, h);
+
+    if (u < 0.0 || u > 1.0)
+        return false;
+
+    vec3 q = cross(s, edge1);
+
+    float v = f * dot(ray.direction, q);
+
+    if (v < 0.0 || u + v > 1.0)
+    return false;
+
+    float tempT = f * dot(edge2, q);
+
+    if (tempT <= EPSILON)
+    return false;
+
+    hit.hit = true;
+    hit.t = tempT;
+    hit.position = ray.origin + ray.direction * tempT;
+
+    // Interpolated normal
+    float w = 1.0 - u - v;
+
+    hit.normal = normalize(
+      triangle.n0.xyz * w +
+      triangle.n1.xyz * u +
+      triangle.n2.xyz * v
+    );
+
+    hit.albedo = vec3(0.8);
+    hit.emission = 0.0;
+
+    hit.materialProperties = vec4(MATERIAL_DIFFUSE, 0.0, 0.0, 0.0);
+
+    hit.emissive = false;
+
+    return true;
+}
+
 struct Box {
     vec4 min;
     vec4 max;
@@ -338,6 +413,14 @@ bool traceScene(Ray ray, out HitInfo hit) {
     for(int i = 0; i < uBoxCount; i++) {
         if(intersectBox(ray, boxes[i], temp)) {
             if(temp.t < hit.t) {
+                hit = temp;
+            }
+        }
+    }
+
+    for(int i = 0; i < uTriangleCount; i++) {
+        if(intersectTriangle(ray, triangles[i], temp)) {
+            if(temp . t < hit.t) {
                 hit = temp;
             }
         }

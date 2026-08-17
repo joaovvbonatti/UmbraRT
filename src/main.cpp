@@ -11,6 +11,8 @@
 #include "Model/ModelLoader.h"
 
 int main() {
+
+
     Window window(1600, 900);
 
     Camera camera;
@@ -30,9 +32,23 @@ int main() {
     //Scene scene = randomScene(999);
     //scene.planes.emplace_back(glm::vec3(0.0), glm::vec3(0.0, 1.0, 0.0), Material(Material::DIFFUSE, glm::vec3(0.1), 0.0, 0.0, 0.0));
 
-    Model cube = ModelLoader::load("assets/cube.obj");
-    cube.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
-    scene.models.push_back(std::move(cube));
+    //Model cube = ModelLoader::load("assets/cube.obj");
+    //cube.transform = glm::translate(glm::mat4(1.0f), glm::vec3(-5.0f, 3.0f, 0.0f));
+    //scene.models.push_back(std::move(cube));
+
+    Model suzanne = ModelLoader::load("assets/suzanne-0.3.obj");
+    glm::vec3 position(-3.0f, 3.0f, -0.0f);
+    glm::vec3 scale(2.0f);
+    suzanne.transform =
+    glm::translate(glm::mat4(1.0f), position)
+    * glm::rotate(
+        glm::mat4(1.0f),
+        glm::radians(-90.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f)
+    )
+    * glm::scale(glm::mat4(1.0f), scale);
+
+    scene.models.push_back(std::move(suzanne));
     scene.buildTriangles();
     std::cout << "Triangles: " << scene.triangles.size() << std::endl;
 

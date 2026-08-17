@@ -5,6 +5,7 @@
 #include "Scene.h"
 #include "Shader.h"
 #include "glad/gl.h"
+#include "TriangleBuffer.h"
 
 class Renderer {
 public:
@@ -37,4 +38,6 @@ private:
     AccumulationBuffer accumulation;
 
     void createPresentBuffer(int width, int height);
+
+    TriangleBuffer triangleBuffer;
 };

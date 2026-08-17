@@ -44,6 +44,7 @@ void Renderer::render(Camera& camera, Scene& scene) {
     shader.setVec3("uSkyHorizon", scene.skyHorizon);
     shader.setFloat("uSkyIntensity", scene.skyIntensity);
     shader.setInt("uPlaneCount", scene.planes.size());
+    shader.setInt("uTriangleCount", scene.triangles.size());
 
 
     glEnable(GL_BLEND);
@@ -170,6 +171,10 @@ void Renderer::sendToGPU(Scene &scene) {
     glBufferData(GL_UNIFORM_BUFFER, gpuPlanes.size() * sizeof(gpuPlane), gpuPlanes.data(), GL_DYNAMIC_DRAW);
     glBindBufferBase(GL_UNIFORM_BUFFER,2,planeUBO);
     glBindBuffer(GL_UNIFORM_BUFFER,0);
+
+    //Triangles
+    triangleBuffer.upload(scene.triangles);
+    triangleBuffer.bind(3);
 }
 
 GLuint Renderer::getRenderTexture() {
