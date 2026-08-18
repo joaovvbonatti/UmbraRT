@@ -27,6 +27,7 @@ int main() {
 
     Renderer renderer;
 
+
     Scene scene = cornell();
 
     //Scene scene = randomScene(999);
